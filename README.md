@@ -26,4 +26,4 @@ This is a project for our GoSchool Project Live Batch 4.
 - Alvin
 - Khairul
 - Koh Shao Wei
-- Sherman Lim
+- Sherman Lum
