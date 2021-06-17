@@ -26,4 +26,4 @@ This is a project for our GoSchool Project Live Batch 4.
 - [Alvin](https://github.com/xenodus)
 - [Khairul](https://github.com/mofodox)
 - [Koh Shao Wei](https://github.com/ksw95)
-- [Sherman Lim](https://github.com/Smbsg)
+- [Sherman Lum](https://github.com/Smbsg)
