@@ -1,9 +1,7 @@
-name: Discord Notify
+name: Discord Notification
 on:
   push:
     branches: [alvin]
-
-name: Discord Notification
 
 jobs:
   notify:
