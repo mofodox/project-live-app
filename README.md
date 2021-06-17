@@ -26,6 +26,9 @@ This app is to help HBBs be known to the users of the app.
 
 ## Features
 
+## Database Flow
+[Miro Board](https://miro.com/app/board/o9J_l-xAAp8=/)
+
 ## Team Members
 
 - [Alvin](https://github.com/xenodus)
