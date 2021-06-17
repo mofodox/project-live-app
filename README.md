@@ -2,24 +2,24 @@
 
 This is a project for our GoSchool Project Live Batch 4.
 
-# File structure
+## File structure
 
-api
+- api
   |- controllers
   |- routes
   |- models
   |- auth (security)
   |- utils
   |- middlewares
-tests
-views
-go.mod
-go.sum
-.env
-main.go (start file)
-README.md
+- tests
+- views
+- go.mod
+- go.sum
+- .env
+- main.go (start file)
+- README.md
 
-# Team Members
+## Team Members
 
 - Alvin
 - Khairul
