@@ -22,6 +22,7 @@ This is a project for our GoSchool Project Live Batch 4.
 ```
 
 ## Overview
+This app is to help HBBs be known to the users of the app.
 
 ## Features
 
