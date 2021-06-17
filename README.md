@@ -23,7 +23,7 @@ This is a project for our GoSchool Project Live Batch 4.
 
 ## Team Members
 
-- Alvin
-- Khairul
-- Koh Shao Wei
-- Sherman Lim
+- [Alvin](http://github.com)
+- [Khairul](https://github.com/mofodox)
+- [Koh Shao Wei](https://github.com/ksw95)
+- [Sherman Lim](https://github.com/Smbsg)
