@@ -4,6 +4,7 @@ This is a project for our GoSchool Project Live Batch 4.
 
 ## File structure
 
+```
 - api
   |- controllers
   |- routes
@@ -18,6 +19,7 @@ This is a project for our GoSchool Project Live Batch 4.
 - .env
 - main.go (start file)
 - README.md
+```
 
 ## Team Members
 
