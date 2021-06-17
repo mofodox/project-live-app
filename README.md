@@ -26,7 +26,7 @@ This app is to help HBBs be known to the users of the app.
 
 It allows registered users to create business listings, upload images and leave comments. 
 
-Businesses' geographic coordinates, latitude and longitude will be derived from their address via geocoding allowing users to search for business around any location.
+Businesses' geographic coordinates, latitude and longitude will be derived from their address via geocoding allowing users to search for businesses around any location.
 
 ## Database Flow
 [Miro Board](https://miro.com/app/board/o9J_l-xAAp8=/)
