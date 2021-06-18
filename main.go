@@ -7,16 +7,6 @@ import (
 	"project-live-app/api/utils"
 )
 
-// db settings
-var (
-	dbHostname   string
-	dbPort       string
-	dbUsername   string
-	dbPassword   string
-	dbDatabase   string
-	dbConnection string
-)
-
 func init() {
 	utils.Db.AutoMigrate(&models.Business{})
 }
