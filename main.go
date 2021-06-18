@@ -8,7 +8,7 @@ import (
 
 func init() {
 	// Table creation in Database
-	utils.Db.AutoMigrate(&models.Business{}, &models.User{}) 
+	utils.Db.AutoMigrate(&models.Business{}, &models.User{})
 }
 
 func main() {
