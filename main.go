@@ -1,8 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"github.com/mofodox/project-live-app/api/routes"
+)
 
 func main() {
-  fmt.Println("Hello World")
+  routes.HandleRoutes(":8080")
 }
 
