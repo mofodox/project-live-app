@@ -28,5 +28,8 @@ func (server *Server) Initialize(DbUser, DbPassword, DbPort, DbHost, DbName stri
 		fmt.Println("We are connected to the database")
 	}
 
+	/*
+	 
+	*/
 	server.DB.Debug().AutoMigrate(&models.User{})
 }
