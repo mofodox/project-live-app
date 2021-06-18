@@ -7,9 +7,11 @@ import (
 )
 
 func init() {
-	utils.Db.AutoMigrate(&models.Business{}, &models.User{})
+	// Table creation in Database
+	utils.Db.AutoMigrate(&models.Business{}, &models.User{}) 
 }
 
 func main() {
+	// Starts the server in router.go
 	routes.HandleRoutes(":8080")
 }
