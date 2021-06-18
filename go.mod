@@ -1,4 +1,4 @@
-module project-live-app
+module github.com/mofodox/project-live-app
 
 go 1.16
 

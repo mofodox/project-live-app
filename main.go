@@ -1,14 +1,13 @@
 package main
 
 import (
+	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/routes"
-
-	"project-live-app/api/models"
-	"project-live-app/api/utils"
+	"github.com/mofodox/project-live-app/api/utils"
 )
 
 func init() {
-	utils.Db.AutoMigrate(&models.Business{})
+	utils.Db.AutoMigrate(&models.Business{}, &models.User{})
 }
 
 func main() {
