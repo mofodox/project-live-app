@@ -8,3 +8,9 @@ type User struct {
 	Fullname string `json:"full_name"`
 	Password string `json:"password"`
 }
+
+func (user *User) CreateUser() (*User, error) {
+	return user, nil
+}
+
+

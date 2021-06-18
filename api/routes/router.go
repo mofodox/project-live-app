@@ -18,11 +18,11 @@ func HandleRoutes(addr string) {
 	* TODO: Change the REST API Verbs
 	*/
 
-	router.HandleFunc(defaultURI+"/users", users.CreateUserHandler).Methods("GET")
-	router.HandleFunc(defaultURI+"/users", users.GetAllUsersHandler).Methods("GET")
-	router.HandleFunc(defaultURI+"/users/{id}", users.GetUserHandler).Methods("GET")
-	router.HandleFunc(defaultURI+"/users/{id}", users.UpdateUserHandler).Methods("GET")
-	router.HandleFunc(defaultURI+"/users/{id}", users.DeleteUserHandler).Methods("GET")
+	router.HandleFunc(defaultURI+"/users", users.CreateUser).Methods("GET")
+	router.HandleFunc(defaultURI+"/users", users.FindAllUsers).Methods("GET")
+	router.HandleFunc(defaultURI+"/users/{id}", users.FindUser).Methods("GET")
+	router.HandleFunc(defaultURI+"/users/{id}", users.UpdateUser).Methods("GET")
+	router.HandleFunc(defaultURI+"/users/{id}", users.DeleteUser).Methods("GET")
 
 	
 	log.Printf("Server is running on port %s\n", addr)
