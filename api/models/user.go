@@ -4,16 +4,19 @@ import (
 	"html"
 	"log"
 	"strings"
+	"time"
 
+	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type User struct {
-	gorm.Model
-	Email    string `json:"email"`
-	Fullname string `json:"full_name"`
-	Password string `json:"password"`
+	ID uint32 `gorm:"primary_key;auto_increment" json:"id"`
+	Email    string `gorm:"size:100;unique;not null" json:"email"`
+	Fullname string `gorm:"size:255;not_nulls" json:"fullname"`
+	Password string `gorm:"size:100;not_null" json:"password"`
+	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
 /**
@@ -48,16 +51,19 @@ func VerifyPassword(hashedPassword, password string) error {
 
 
 func (user *User) Prepare() {
+	user.ID = 0
 	user.Email = html.EscapeString(strings.TrimSpace(user.Email))
 	user.Fullname = html.EscapeString(strings.TrimSpace(user.Fullname))
+	user.CreatedAt = time.Now()
+	user.UpdatedAt = time.Now()
 }
 
 /**
 	* Create user and save it in the database
 	* @param db pointer the DB
 */
-func (user *User) SaveUser(db *gorm.DB) (*User, error) {
-	err := db.Debug().Create(*user).Error
+func (user *User) CreateUser(db *gorm.DB) (*User, error) {
+	err := db.Debug().Create(&user).Error
 	if err != nil {
 		return &User{}, err
 	}
@@ -72,7 +78,7 @@ func (user *User) SaveUser(db *gorm.DB) (*User, error) {
 func (user *User) FindAllUsers(db *gorm.DB) (*[]User, error) {
 	users := []User{}
 	
-	if err := db.Debug().Model(&User{}).Find(&users).Error; err != nil {
+	if err := db.Debug().Model(&User{}).Limit(100).Find(&users).Error; err != nil {
 		return &[]User{}, err
 	}
 

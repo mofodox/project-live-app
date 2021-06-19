@@ -8,6 +8,7 @@ func (server *Server) initializeRoutes() {
 	* TODO: Change the REST API Verbs
 	*/
 	server.Router.HandleFunc(defaultURI+"/users", server.Register).Methods("POST")
+	server.Router.HandleFunc(defaultURI+"/users", server.Login).Methods("POST")
 	server.Router.HandleFunc(defaultURI+"/users", server.GetUsers).Methods("GET")
 
 	/**

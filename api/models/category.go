@@ -3,7 +3,7 @@ package models
 import (
 	//"time"
 
-	"gorm.io/gorm"
+	"github.com/jinzhu/gorm"
 )
 
 type Category struct {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/mofodox/project-live-app/api/controllers"
+	"github.com/mofodox/project-live-app/api/seed"
 )
 
 var server = controllers.Server{}
@@ -17,5 +18,6 @@ func Run() {
 	}
 
 	server.Initialize()
+	seed.Load(server.DB)
 	server.Run(":8080")
 }
