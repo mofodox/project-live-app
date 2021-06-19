@@ -7,11 +7,13 @@ This is a project for our GoSchool Project Live Batch 4.
 ```
 - api
   |- controllers
-  |- routes
+    |- routes.go
   |- models
   |- auth (security)
   |- utils
   |- middlewares
+  |- server.go
+  |- responses
 - tests
 - views
 - go.mod
