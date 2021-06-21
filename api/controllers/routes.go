@@ -6,13 +6,19 @@ func (server *Server) initializeRoutes() {
 	/**
 	* User routes
 	* TODO: Change the REST API Verbs
-	*/
+	 */
 	server.Router.HandleFunc(defaultURI+"/users", server.Register).Methods("POST")
 	server.Router.HandleFunc(defaultURI+"/users", server.Login).Methods("POST")
 	server.Router.HandleFunc(defaultURI+"/users", server.GetUsers).Methods("GET")
 
 	/**
+	* Business routes
+	* TODO: Change the REST API Verbs
+	 */
+	//server.Router.HandleFunc(defaultURI+"/business", server.Create).Methods("POST")
+
+	/**
 	* API Health check route
-	*/
+	 */
 	server.Router.HandleFunc(defaultURI+"/health", server.Health).Methods("GET")
 }
