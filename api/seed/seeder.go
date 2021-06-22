@@ -86,19 +86,4 @@ func Load(db *gorm.DB) {
 			log.Fatalf("cannot seed categories table %v\n", err)
 		}
 	}
-
-	err = db.Debug().Find(&models.Category{}).Error
-	if err != nil {
-		log.Fatalf("cannot find categories table %v\n", err)
-	}
-
-	err = db.Debug().Model(&models.Category{}).Where("id = ?", 1).Update("name", "testing").Error
-	if err != nil {
-		log.Fatalf("cannot update categories table %v\n", err)
-	}
-
-	err = db.Debug().Delete(&models.Category{}, 2).Error
-	if err != nil {
-		log.Fatalf("cannot update categories table %v\n", err)
-	}
 }
