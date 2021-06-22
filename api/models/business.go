@@ -47,11 +47,8 @@ func (business *Business) Geocode() (lat float64, lnt float64, err error) {
 
 	if err == nil && len(results) > 0 {
 
-		lat := results[0].Geometry.Location.Lat
-		lng := results[0].Geometry.Location.Lng
-
-		business.Lat = lat
-		business.Lng = lng
+		business.Lat = results[0].Geometry.Location.Lat
+		business.Lng = results[0].Geometry.Location.Lng
 
 		return lat, lng, nil
 	}
