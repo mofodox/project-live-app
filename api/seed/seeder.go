@@ -31,6 +31,17 @@ var businesses = []models.Business{
 	},
 }
 
+var categories = []models.Category{
+	models.Category{
+		Name:        "Baking",
+		Description: "A method of preparing food that uses dry heat, typically in an oven, but can also be done in hot ashes, or on hot stones",
+	},
+	models.Category{
+		Name:        "Private tutoring",
+		Description: "A tutor as a person who gives individual, or in some cases small group",
+	},
+}
+
 func Load(db *gorm.DB) {
 	err := db.Debug().DropTableIfExists(&models.User{}, &models.Business{}).Error
 	if err != nil {
@@ -57,5 +68,37 @@ func Load(db *gorm.DB) {
 		if err != nil {
 			log.Fatalf("cannot seed business table %v\n", err)
 		}
+	}
+
+	err2 := db.Debug().DropTableIfExists(&models.Category{}).Error
+	if err2 != nil {
+		log.Fatalf("cannot drop table: %v\n", err)
+	}
+
+	err = db.Debug().AutoMigrate(&models.Category{}).Error
+	if err != nil {
+		log.Fatalf("cannot migrate table: %v\n", err)
+	}
+
+	for i := range categories {
+		err = db.Debug().Model(&models.Category{}).Create(&categories[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed categories table %v\n", err)
+		}
+	}
+
+	err = db.Debug().Find(&models.Category{}).Error
+	if err != nil {
+		log.Fatalf("cannot find categories table %v\n", err)
+	}
+
+	err = db.Debug().Model(&models.Category{}).Where("id = ?", 1).Update("name", "testing").Error
+	if err != nil {
+		log.Fatalf("cannot update categories table %v\n", err)
+	}
+
+	err = db.Debug().Delete(&models.Category{}, 2).Error
+	if err != nil {
+		log.Fatalf("cannot update categories table %v\n", err)
 	}
 }
