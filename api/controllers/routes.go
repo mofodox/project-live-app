@@ -22,6 +22,13 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/businesses/{id:[0-9]+}", server.UpdateBusiness).Methods("PUT")
 
 	/**
+	* Category routes
+	 */
+	server.Router.HandleFunc(defaultURI+"/categories/", server.CreateCategory).Methods("POST")
+	server.Router.HandleFunc(defaultURI+"/categories/{id:[0-9]+}", server.GetCategory).Methods("GET")
+	server.Router.HandleFunc(defaultURI+"/categories/{id:[0-9]+}", server.DeleteCategory).Methods("DELETE")
+
+	/**
 	* API Health check route
 	 */
 	server.Router.HandleFunc(defaultURI+"/health", server.Health).Methods("GET")
