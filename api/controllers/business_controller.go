@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -13,6 +14,18 @@ import (
 	"github.com/mofodox/project-live-app/api/responses"
 )
 
+func (server *Server) TestGeocode(res http.ResponseWriter, req *http.Request) {
+	// test reverse geocoding
+	var business models.Business
+
+	if err := server.DB.First(&business, 2).Error; err != nil {
+		responses.ERROR(res, http.StatusNotFound, errors.New("business not found"))
+		return
+	}
+
+	fmt.Println(business)
+}
+
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
@@ -22,6 +35,12 @@ func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request)
 		if err == nil {
 			// convert JSON to object
 			json.Unmarshal(reqBody, &newBusiness)
+
+			// get lat / lng automatically
+			if newBusiness.Lat == 0 && newBusiness.Lng == 0 {
+				newBusiness.Geocode()
+			}
+
 			result := server.DB.Create(&newBusiness)
 
 			if result.Error != nil {

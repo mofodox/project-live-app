@@ -14,6 +14,7 @@ func (server *Server) initializeRoutes() {
 	/**
 	* Business routes
 	 */
+	server.Router.HandleFunc(defaultURI+"/businesses/test", server.TestGeocode).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/businesses/search", server.SearchBusinesses).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/businesses/{id:[0-9]+}", server.GetBusiness).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/businesses", server.CreateBusiness).Methods("POST")
