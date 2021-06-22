@@ -17,7 +17,7 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/businesses/search", server.SearchBusinesses).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/businesses/{id:[0-9]+}", server.GetBusiness).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/businesses", server.CreateBusiness).Methods("POST")
-	server.Router.HandleFunc(defaultURI+"/businesses", server.UpdateBusiness).Methods("PUT")
+	server.Router.HandleFunc(defaultURI+"/businesses/{id:[0-9]+}", server.UpdateBusiness).Methods("PUT")
 
 	/**
 	* API Health check route
