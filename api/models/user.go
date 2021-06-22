@@ -49,7 +49,6 @@ func VerifyPassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
-
 func (user *User) Prepare() {
 	user.ID = 0
 	user.Email = html.EscapeString(strings.TrimSpace(user.Email))
