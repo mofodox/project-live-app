@@ -81,6 +81,12 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 		if err == nil {
 			// convert JSON to object
 			json.Unmarshal(reqBody, &updatedBusiness)
+
+			addressChanged := false
+			if business.Address != updatedBusiness.Address || business.UnitNo != updatedBusiness.UnitNo || business.Zipcode != updatedBusiness.Zipcode {
+				addressChanged = true
+			}
+
 			business.Name = updatedBusiness.Name
 			business.Address = updatedBusiness.Address
 			business.UnitNo = updatedBusiness.UnitNo
@@ -88,6 +94,11 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 			business.Lat = updatedBusiness.Lat
 			business.Lng = updatedBusiness.Lng
 			business.Status = updatedBusiness.Status
+
+			// get lat / lng automatically
+			if addressChanged && business.Lat == 0 && business.Lng == 0 {
+				business.Geocode()
+			}
 
 			result := server.DB.Save(&business)
 
