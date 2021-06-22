@@ -21,11 +21,11 @@ func (server *Server) Initialize() {
 	var err error
 
 	var DbDriver = "mysql"
-	var DbHost = os.Getenv("TestDbHost")
-	var DbPort = os.Getenv("TestDbPort")
-	var DbUser = os.Getenv("TestDbUser")
-	var DbPassword = os.Getenv("TestDbPassword")
-	var DbName = os.Getenv("TestDbName")
+	var DbHost = os.Getenv("MYSQL_HOSTNAME")
+	var DbPort = os.Getenv("MYSQL_PORT")
+	var DbUser = os.Getenv("MYSQL_USERNAME")
+	var DbPassword = os.Getenv("MYSQL_PASSWORD")
+	var DbName = os.Getenv("MYSQL_DATABASE")
 
 	// dbConnection = dbUsername + ":" + dbPassword + "@tcp(" + dbHostname + ":" + dbPort + ")/" + dbDatabase
 	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", DbUser, DbPassword, DbHost, DbPort, DbName)
