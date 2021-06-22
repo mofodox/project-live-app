@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/mofodox/project-live-app/api/models"
@@ -65,6 +66,47 @@ func (server *Server) GetBusiness(res http.ResponseWriter, req *http.Request) {
 	responses.ERROR(res, http.StatusNotFound, errors.New("business not found"))
 }
 
-func (server *Server) SearchBusiness(res http.ResponseWriter, req *http.Request) {
+// http://localhost:8080/api/v1/businesses/search?page=1&name=wayne
+func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Request) {
 
+	name := req.FormValue("name")
+	status := strings.ToLower(req.FormValue("status"))
+	page := req.FormValue("page")
+
+	// Status
+	if status != "" && status != "active" {
+		status = "inactive"
+	}
+
+	// Pagination
+	pageNo, err := strconv.Atoi(page)
+
+	if err != nil || pageNo <= 0 {
+		pageNo = 1
+	}
+
+	limit := 15
+	offset := (pageNo - 1) * limit
+
+	var businesses = []models.Business{}
+
+	// Construct query
+	result := server.DB.Offset(offset).Limit(limit)
+
+	if name != "" {
+		result = result.Where("name LIKE ?", "%"+name+"%")
+	}
+
+	if status != "" {
+		result = result.Where("status = ?", status)
+	}
+
+	result = result.Find(&businesses).Order("name")
+
+	if result.Error != nil {
+		responses.ERROR(res, http.StatusInternalServerError, result.Error)
+		return
+	}
+
+	responses.JSON(res, http.StatusOK, businesses)
 }
