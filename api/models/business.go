@@ -50,7 +50,7 @@ func (business *Business) Geocode() (lat float64, lnt float64, err error) {
 		business.Lat = results[0].Geometry.Location.Lat
 		business.Lng = results[0].Geometry.Location.Lng
 
-		return lat, lng, nil
+		return business.Lat, business.Lng, nil
 	}
 
 	return 0, 0, errors.New("unable to fetch lat/lng")
