@@ -15,7 +15,7 @@ func (server *Server) initializeRoutes() {
 	* Business routes
 	* TODO: Change the REST API Verbs
 	 */
-	//server.Router.HandleFunc(defaultURI+"/business", server.Create).Methods("POST")
+	server.Router.HandleFunc(defaultURI+"/businesses/{id}", server.GetBusiness).Methods("GET")
 
 	/**
 	* API Health check route
