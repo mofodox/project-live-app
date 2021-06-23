@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
 )
@@ -16,12 +17,22 @@ import (
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
+
+		// check JWT and get user id
+		userId, err := auth.ExtractTokenID(req)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+			return
+		}
+
 		var newBusiness models.Business
 		reqBody, err := ioutil.ReadAll(req.Body)
 
 		if err == nil {
 			// convert JSON to object
 			json.Unmarshal(reqBody, &newBusiness)
+
+			newBusiness.UserID = userId
 
 			// get lat / lng automatically
 			if newBusiness.Lat == 0 && newBusiness.Lng == 0 {
@@ -48,6 +59,14 @@ func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request)
 func (server *Server) DeleteBusiness(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
+
+		// check JWT and get user id
+		userId, err := auth.ExtractTokenID(req)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+			return
+		}
+
 		vars := mux.Vars(req)
 		business_id, err := strconv.Atoi(vars["id"])
 
@@ -63,6 +82,7 @@ func (server *Server) DeleteBusiness(res http.ResponseWriter, req *http.Request)
 			return
 		}
 
+		business.UserID = userId
 		business.Status = "inactive"
 
 		result := server.DB.Save(&business)
@@ -82,6 +102,14 @@ func (server *Server) DeleteBusiness(res http.ResponseWriter, req *http.Request)
 func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
+
+		// check JWT and get user id
+		userId, err := auth.ExtractTokenID(req)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+			return
+		}
+
 		vars := mux.Vars(req)
 		business_id, err := strconv.Atoi(vars["id"])
 
@@ -110,6 +138,7 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 				addressChanged = true
 			}
 
+			business.UserID = userId
 			business.Name = updatedBusiness.Name
 			business.Address = updatedBusiness.Address
 			business.UnitNo = updatedBusiness.UnitNo
@@ -117,6 +146,10 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 			business.Lat = updatedBusiness.Lat
 			business.Lng = updatedBusiness.Lng
 			business.Status = updatedBusiness.Status
+
+			business.Website = updatedBusiness.Website
+			business.Instagram = updatedBusiness.Instagram
+			business.Facebook = updatedBusiness.Facebook
 
 			// get lat / lng automatically
 			if addressChanged && business.Lat == 0 && business.Lng == 0 {
