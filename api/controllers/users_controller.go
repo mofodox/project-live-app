@@ -191,3 +191,35 @@ func (server *Server) UpdateUserById(res http.ResponseWriter, req *http.Request)
 
 	responses.JSON(res, http.StatusOK, updatedUser)
 }
+
+func (server *Server) DeleteUserByID(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	
+	user := models.User{}
+
+	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		responses.ERROR(res, http.StatusBadRequest, err)
+		return
+	}
+
+	tokenId, err := auth.ExtractTokenID(req)
+	if err != nil {
+		responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+		return
+	}
+
+	if tokenId != 0 && tokenId != uint32(uid) {
+		responses.ERROR(res, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+		return
+	}
+
+	_, err = user.DeleteUser(server.DB, uint32(uid))
+	if err != nil {
+		responses.ERROR(res, http.StatusInternalServerError, err)
+		return
+	}
+
+	res.Header().Set("Entity", fmt.Sprintf("%d\n", uid))
+	responses.JSON(res, http.StatusNoContent, "success")
+}
