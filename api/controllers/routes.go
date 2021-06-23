@@ -1,17 +1,19 @@
 package controllers
 
+import "github.com/mofodox/project-live-app/api/middlewares"
+
 func (server *Server) initializeRoutes() {
 	defaultURI := "/api/v1"
 
 	/**
 	* User routes
 	 */
-	server.Router.HandleFunc(defaultURI+"/users", server.Register).Methods("POST")
-	server.Router.HandleFunc(defaultURI+"/users/login", server.Login).Methods("POST")
-	server.Router.HandleFunc(defaultURI+"/users", server.GetUsers).Methods("GET")
-	server.Router.HandleFunc(defaultURI+"/users/logout", server.Logout).Methods("POST")
-	server.Router.HandleFunc(defaultURI+"/users/{id}", server.GetUserById).Methods("GET")
-	server.Router.HandleFunc(defaultURI+"/users/{id}", server.UpdateUserById).Methods("PUT")
+	server.Router.HandleFunc(defaultURI+"/users", middlewares.SetMiddlewareJSON(server.Register)).Methods("POST")
+	server.Router.HandleFunc(defaultURI+"/users/login", middlewares.SetMiddlewareJSON(server.Login)).Methods("POST")
+	server.Router.HandleFunc(defaultURI+"/users", middlewares.SetMiddlewareJSON(server.GetUsers)).Methods("GET")
+	server.Router.HandleFunc(defaultURI+"/users/logout", middlewares.SetMiddlewareJSON(server.Logout)).Methods("POST")
+	server.Router.HandleFunc(defaultURI+"/users/{id}", middlewares.SetMiddlewareJSON(server.GetUserById)).Methods("GET")
+	server.Router.HandleFunc(defaultURI+"/users/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(server.UpdateUserById))).Methods("PUT")
 
 	/**
 	* Business routes
