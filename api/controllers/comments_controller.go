@@ -24,9 +24,13 @@ func (server *Server) AddComment(res http.ResponseWriter, req *http.Request) {
 				responses.ERROR(res, http.StatusInternalServerError, err)
 				return
 			}
+			if newComment.BusinessID == 0 {
+				responses.ERROR(res, http.StatusBadRequest, errors.New("not enough"+
+					" information provided"))
+			}
 			newComment.CreatedAt = time.Now()
 			newComment.UpdatedAt = time.Now()
-			// need to add User ID and Business ID as well
+			// need to add User ID
 			err = server.DB.Debug().Create(&newComment).Error
 			if err != nil {
 				responses.ERROR(res, http.StatusInternalServerError, err)
@@ -90,7 +94,7 @@ func (server *Server) RemoveComments(res http.ResponseWriter, req *http.Request)
 			return
 		}
 		var currentComment models.Comment
-		err = server.DB.First(&currentComment, comment_ID)
+		err = server.DB.First(&currentComment, comment_ID).Error
 
 	}
 }
