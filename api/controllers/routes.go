@@ -14,6 +14,7 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/users/logout", middlewares.SetMiddlewareJSON(server.Logout)).Methods("POST")
 	server.Router.HandleFunc(defaultURI+"/users/{id}", middlewares.SetMiddlewareJSON(server.GetUserById)).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/users/{id}", middlewares.SetMiddlewareJSON(middlewares.SetMiddlewareAuthentication(server.UpdateUserById))).Methods("PUT")
+	server.Router.HandleFunc(defaultURI+"/users/{id}", middlewares.SetMiddlewareAuthentication(server.DeleteUserByID)).Methods("DELETE")
 
 	/**
 	* Business routes
