@@ -24,6 +24,7 @@ var users = []models.User{
 var businesses = []models.Business{
 	models.Business{
 		Name:        "Eat My CB",
+		UserID:      1,
 		Description: "Homemade curry-stuffed buns",
 		Address:     "175C Punggol Field",
 		UnitNo:      "",
@@ -37,6 +38,7 @@ var businesses = []models.Business{
 
 	models.Business{
 		Name:        "Bekel Mama",
+		UserID:      1,
 		Description: "Homemade Malay food. Quality Malay food delights. $9 island wide delivery for lunch or dinner. Click on this link to ORDER: <a href=\"wa.me/6598266648\">https://wa.me/6598266648</a>",
 		Address:     "",
 		UnitNo:      "",
@@ -50,6 +52,7 @@ var businesses = []models.Business{
 
 	models.Business{
 		Name:        "Le Vyr - Locally fermented kombucha",
+		UserID:      1,
 		Description: "Brewed with an intense passion for our cuisine culture, our brews are inspired by and fermented with premium local ingredients.",
 		Address:     "King George's Building",
 		UnitNo:      "",
@@ -63,6 +66,7 @@ var businesses = []models.Business{
 
 	models.Business{
 		Name:        "Ms Chili SG – freshly made Indonesian keropok and chilli",
+		UserID:      1,
 		Description: "Bring Indonesian hometown flavours to you ❤️<br/>🌶️ Freshly made to order<br/>🌶️ Pre-order every Sunday<br/>🌶️ No pork / No lard<br/>Order here 👇🏻<br/><a href=\"https://mschili.cococart.co/\">https://mschili.cococart.co/</a>",
 		Address:     "",
 		UnitNo:      "",
@@ -76,6 +80,7 @@ var businesses = []models.Business{
 
 	models.Business{
 		Name:        "Upcakes – Mao Shan Wang chocolate cakes",
+		UserID:      1,
 		Description: "Calling all durian lovers: Upcakes has one of the best durian chocolate cakes ever, IMO. Not only is the cake extremely moist on the inside, the flavours of the chocolate and durian are also perfectly balanced, as all things should be.",
 		Address:     "Shelford Road",
 		UnitNo:      "",
@@ -89,6 +94,7 @@ var businesses = []models.Business{
 
 	models.Business{
 		Name:        "Your Daily Batter - basque burnt cheesecakes",
+		UserID:      1,
 		Description: "DM to order!",
 		Address:     "Jalan Kayu",
 		UnitNo:      "",
@@ -102,6 +108,7 @@ var businesses = []models.Business{
 
 	models.Business{
 		Name:        "Okieco - New York banana pudding by the pint",
+		UserID:      1,
 		Description: "Our Puddings are made from scratch, assembled by hand and contain only quality ingredients we approve of. Oh, and did we mention that they are made F R E S H?",
 		Address:     "8 Somapah Road, SUTD, Building 2",
 		UnitNo:      "#01-202A",
