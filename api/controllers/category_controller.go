@@ -12,6 +12,24 @@ import (
 	"github.com/mofodox/project-live-app/api/responses"
 )
 
+func (server *Server) GetAllCategory(res http.ResponseWriter, req *http.Request) {
+
+	if req.Header.Get("Content-type") == "application/json" {
+
+		var category []models.Category
+
+		if err := server.DB.Find(&category).Error; err != nil {
+			responses.ERROR(res, http.StatusNotFound, errors.New("category not found"))
+			return
+		}
+
+		responses.JSON(res, http.StatusOK, category)
+		return
+	}
+
+	responses.ERROR(res, http.StatusNotFound, errors.New("category not found"))
+}
+
 func (server *Server) CreateCategory(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
