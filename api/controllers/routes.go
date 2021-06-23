@@ -11,6 +11,7 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/users", server.GetUsers).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/users/logout", server.Logout).Methods("POST")
 	server.Router.HandleFunc(defaultURI+"/users/{id}", server.GetUserById).Methods("GET")
+	server.Router.HandleFunc(defaultURI+"/users/{id}", server.UpdateUserById).Methods("PUT")
 
 	/**
 	* Business routes
