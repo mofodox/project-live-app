@@ -9,13 +9,17 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
 )
 
 func (server *Server) AddComment(res http.ResponseWriter, req *http.Request) {
-	// needs to be logged into an account to add comment
 	if req.Header.Get("Content-type") == "application/json" {
+		userID, err := auth.ExtractTokenID(req)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("no authorization"))
+		}
 		reqBody, err := ioutil.ReadAll(req.Body)
 		if err == nil {
 			newComment := models.Comment{}
@@ -24,13 +28,13 @@ func (server *Server) AddComment(res http.ResponseWriter, req *http.Request) {
 				responses.ERROR(res, http.StatusInternalServerError, err)
 				return
 			}
-			if newComment.BusinessID == 0 {
+			if newComment.BusinessID == 0 || (newComment.Content == "" /* || reivew == 0 */) {
 				responses.ERROR(res, http.StatusBadRequest, errors.New("not enough"+
 					" information provided"))
 			}
+			newComment.UserID = userID
 			newComment.CreatedAt = time.Now()
 			newComment.UpdatedAt = time.Now()
-			// need to add User ID
 			err = server.DB.Debug().Create(&newComment).Error
 			if err != nil {
 				responses.ERROR(res, http.StatusInternalServerError, err)
@@ -51,8 +55,11 @@ func (server *Server) UserComments(res http.ResponseWriter, req *http.Request) {
 }
 
 func (server *Server) EditComments(res http.ResponseWriter, req *http.Request) {
-	// check whether user is logged in
 	if req.Header.Get("Content-type") == "application/json" {
+		userID, err := auth.ExtractTokenID(req)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("no authorization"))
+		}
 		vars := mux.Vars(req)
 		comment_ID, err := strconv.Atoi(vars["id"])
 		if err != nil {
@@ -65,7 +72,7 @@ func (server *Server) EditComments(res http.ResponseWriter, req *http.Request) {
 			responses.ERROR(res, http.StatusNotFound, err)
 			return
 		}
-		if true /*currentComment.UserID == currentUserID */ {
+		if currentComment.UserID == userID {
 			updateComment := models.Comment{}
 			reqBody, err := ioutil.ReadAll(req.Body)
 			if err == nil {
@@ -76,17 +83,25 @@ func (server *Server) EditComments(res http.ResponseWriter, req *http.Request) {
 				}
 				currentComment.Content = updateComment.Content
 				currentComment.UpdatedAt = time.Now()
-				// update inside database
+				err = server.DB.Save(&currentComment).Error
+				if err != nil {
+					responses.ERROR(res, http.StatusInternalServerError, err)
+					return
+				}
+				responses.JSON(res, http.StatusOK, currentComment)
 			}
 		} else {
-			responses.ERROR(res, http.StatusForbidden, errors.New("user not"+
-				" authorized to edit this comment"))
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("no authorization"))
 		}
 	}
 }
 
 func (server *Server) RemoveComments(res http.ResponseWriter, req *http.Request) {
 	if req.Header.Get("Content-type") == "application/json" {
+		userID, err := auth.ExtractTokenID(req)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("no authorization"))
+		}
 		vars := mux.Vars(req)
 		comment_ID, err := strconv.Atoi(vars["id"])
 		if err != nil {
@@ -95,6 +110,16 @@ func (server *Server) RemoveComments(res http.ResponseWriter, req *http.Request)
 		}
 		var currentComment models.Comment
 		err = server.DB.First(&currentComment, comment_ID).Error
-
+		if err != nil {
+			responses.ERROR(res, http.StatusNotFound, err)
+		}
+		if currentComment.UserID == userID {
+			err = server.DB.Delete(&currentComment, comment_ID).Error
+			if err != nil {
+				responses.ERROR(res, http.StatusInternalServerError, err)
+			}
+		} else {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("no authorization"))
+		}
 	}
 }
