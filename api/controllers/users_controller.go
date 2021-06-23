@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
+	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
 	"golang.org/x/crypto/bcrypt"
@@ -146,4 +148,48 @@ func (server *Server) GetUserById(res http.ResponseWriter, req *http.Request) {
 	}
 
 	responses.JSON(res, http.StatusOK, userId)
+}
+
+func (server *Server) UpdateUserById(res http.ResponseWriter, req *http.Request) {
+	user := &models.User{}
+	
+	vars := mux.Vars(req)
+	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		responses.ERROR(res, http.StatusBadRequest, err)
+		return
+	}
+
+	body, err := ioutil.ReadAll(req.Body)
+	if err != nil {
+		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		responses.ERROR(res, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	tokenId, err := auth.ExtractTokenID(req)
+	if err != nil {
+		responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+		return
+	}
+
+	if tokenId != uint32(uid) {
+		responses.ERROR(res, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+		return
+	}
+
+	user.Prepare()
+
+	updatedUser, err := user.UpdateUserByID(server.DB, uint32(uid))
+	if err != nil {
+		responses.ERROR(res, http.StatusInternalServerError, err)
+		return
+	}
+
+	responses.JSON(res, http.StatusOK, updatedUser)
 }
