@@ -1,11 +1,13 @@
 package models
 
 import (
+	"errors"
 	"html"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/badoux/checkmail"
 	"github.com/jinzhu/gorm"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -55,6 +57,55 @@ func (user *User) Prepare() {
 	user.Fullname = html.EscapeString(strings.TrimSpace(user.Fullname))
 	user.CreatedAt = time.Now()
 	user.UpdatedAt = time.Now()
+}
+
+func (user *User) Validate(action string) error {
+	switch strings.ToLower(action) {
+	case "update":
+		if user.Fullname == "" {
+			return errors.New("fullname required")
+		}
+		if user.Password == "" {
+			return errors.New("password required")
+		}
+		if user.Email == "" {
+			return errors.New("email required")
+		}
+		if err := checkmail.ValidateFormat(user.Email); err != nil {
+			return errors.New("invalid email")
+		}
+
+		return nil
+		
+	case "login":
+		if user.Password == "" {
+			return errors.New("password required")
+		}
+		if user.Email == "" {
+			return errors.New("email required")
+		}
+		if err := checkmail.ValidateFormat(user.Email); err != nil {
+			return errors.New("invalid email")
+		}
+
+		return nil
+
+	default:
+		if user.Fullname == "" {
+			return errors.New("fullname required")
+		}
+		if user.Email == "" {
+			return errors.New("email required")
+		}
+		if err := checkmail.ValidateFormat(user.Email); err != nil {
+			return errors.New("invalid email")
+		}
+		if user.Password == "" {
+			return errors.New("password required")
+		}
+
+		return nil
+	}
 }
 
 /**
