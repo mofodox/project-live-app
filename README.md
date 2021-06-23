@@ -8,12 +8,18 @@ This is a project for our GoSchool Project Live Batch 4.
 - api
   |- controllers
     |- routes.go
+    |- base.go
+    |- users_controller.go
+    |- health_controller.go
+    |- business_controller.go
   |- models
+    |- category.go
+    |- user.go
+    |- business.go
   |- auth (security)
-  |- utils
+    |- token.go
   |- middlewares
-  |- server.go
-  |- responses
+    |- middlewares.go
 - tests
 - views
 - go.mod

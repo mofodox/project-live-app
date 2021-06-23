@@ -7,6 +7,7 @@ import (
 )
 
 func JSON(res http.ResponseWriter, statusCode int, data interface{}) {
+	res.Header().Set("Content-Type", "application/json")
 	res.WriteHeader(statusCode)
 	err := json.NewEncoder(res).Encode(data)
 	if err != nil {
@@ -14,7 +15,7 @@ func JSON(res http.ResponseWriter, statusCode int, data interface{}) {
 	}
 }
 
-func ERROR (res http.ResponseWriter, statusCode int, err error) {
+func ERROR(res http.ResponseWriter, statusCode int, err error) {
 	if err != nil {
 		JSON(res, statusCode, struct {
 			Error string `json:"error"`
