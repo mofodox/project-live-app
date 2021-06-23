@@ -17,69 +17,73 @@ import (
 )
 
 func (server *Server) Register(res http.ResponseWriter, req *http.Request) {
-	res.Header().Set("Content-Type", "application/json")
+	if req.Header.Get("Content-Type") == "application/json" {
+		body, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
 
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
+		user := models.User{}
+		err = json.Unmarshal(body, &user)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
+
+		user.Prepare()
+		err = user.Validate("")
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
+		
+		userCreated, err := user.CreateUser(server.DB)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
+		
+		res.Header().Set("Location", fmt.Sprintf("%s%s/%d", req.Host, req.RequestURI, userCreated.ID))
+		responses.JSON(res, http.StatusCreated, userCreated)
 	}
 
-	user := models.User{}
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	user.Prepare()
-	err = user.Validate("")
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
-	}
-	
-	userCreated, err := user.CreateUser(server.DB)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
-	}
-	
-	res.Header().Set("Location", fmt.Sprintf("%s%s/%d", req.Host, req.RequestURI, userCreated.ID))
-	responses.JSON(res, http.StatusCreated, userCreated)
+	responses.ERROR(res, http.StatusInternalServerError, errors.New("internal server error"))
 }
 
 func (server *Server) Login(res http.ResponseWriter, req *http.Request) {
-	res.Header().Set("Content-Type", "application/json")
+	if req.Header.Get("Content-Type") == "application/json" {
+		user := &models.User{}
 
-	user := &models.User{}
+		body, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
 
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
+		err = json.Unmarshal(body, &user)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
+
+		user.Prepare()
+		err = user.Validate("login")
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
+
+		token, err := server.SignInUser(res, user.Email, user.Password)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
+
+		responses.JSON(res, http.StatusOK, token)
 	}
 
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	user.Prepare()
-	err = user.Validate("login")
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	token, err := server.SignInUser(res, user.Email, user.Password)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	responses.JSON(res, http.StatusOK, token)
+	responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
 }
 
 func (server *Server) SignInUser(res http.ResponseWriter, email, password string) (string, error) {
@@ -112,114 +116,128 @@ func (server *Server) Logout(res http.ResponseWriter, req *http.Request) {
 }
 
 func (server *Server) GetUsers(res http.ResponseWriter, req *http.Request) {
-	res.Header().Set("Content-Type", "application/json")
-
-	user := models.User{}
+	if req.Header.Get("Content-Type") == "application/json" {
+		user := models.User{}
 	
-	users, err := user.FindAllUsers(server.DB)
-	if err != nil {
-		responses.ERROR(res, http.StatusInternalServerError, err)
-		return
+		users, err := user.FindAllUsers(server.DB)
+		if err != nil {
+			responses.ERROR(res, http.StatusInternalServerError, err)
+			return
+		}
+
+		responses.JSON(res, http.StatusOK, users)
 	}
 
-	responses.JSON(res, http.StatusOK, users)
+	responses.ERROR(res, http.StatusNotFound, errors.New("user not found"))
 }
 
 func (server *Server) GetUserById(res http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
-	uid, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		responses.ERROR(res, http.StatusBadRequest, err)
-		return
+	if req.Header.Get("Content-Type") == "application/json" {
+		vars := mux.Vars(req)
+		uid, err := strconv.ParseUint(vars["id"], 10, 32)
+		if err != nil {
+			responses.ERROR(res, http.StatusBadRequest, err)
+			return
+		}
+
+		user := &models.User{}
+		userId, err := user.FindUserByID(server.DB, uint32(uid))
+		if err != nil {
+			responses.ERROR(res, http.StatusBadRequest, err)
+			return
+		}
+
+		responses.JSON(res, http.StatusOK, userId)
 	}
 
-	user := &models.User{}
-	userId, err := user.FindUserByID(server.DB, uint32(uid))
-	if err != nil {
-		responses.ERROR(res, http.StatusBadRequest, err)
-		return
-	}
-
-	responses.JSON(res, http.StatusOK, userId)
+	responses.ERROR(res, http.StatusNotFound, errors.New("user not found"))
 }
 
 func (server *Server) UpdateUserById(res http.ResponseWriter, req *http.Request) {
-	user := models.User{}
+	if req.Header.Get("Content-Type") == "application/json" {
+		user := models.User{}
 	
-	vars := mux.Vars(req)
-	uid, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		responses.ERROR(res, http.StatusBadRequest, err)
-		return
+		vars := mux.Vars(req)
+		uid, err := strconv.ParseUint(vars["id"], 10, 32)
+		if err != nil {
+			responses.ERROR(res, http.StatusBadRequest, err)
+			return
+		}
+
+		body, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
+
+		err = json.Unmarshal(body, &user)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
+
+		tokenId, err := auth.ExtractTokenID(req)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+			return
+		}
+
+		if tokenId != uint32(uid) {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+			return
+		}
+
+		user.Prepare()
+		err = user.Validate("update")
+		if err != nil {
+			responses.ERROR(res, http.StatusUnprocessableEntity, err)
+			return
+		}
+
+		updatedUser, err := user.UpdateUserByID(server.DB, uint32(uid))
+		if err != nil {
+			responses.ERROR(res, http.StatusInternalServerError, err)
+			return
+		}
+
+		responses.JSON(res, http.StatusOK, updatedUser)
 	}
 
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	tokenId, err := auth.ExtractTokenID(req)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
-		return
-	}
-
-	if tokenId != uint32(uid) {
-		responses.ERROR(res, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
-		return
-	}
-
-	user.Prepare()
-	err = user.Validate("update")
-	if err != nil {
-		responses.ERROR(res, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	updatedUser, err := user.UpdateUserByID(server.DB, uint32(uid))
-	if err != nil {
-		responses.ERROR(res, http.StatusInternalServerError, err)
-		return
-	}
-
-	responses.JSON(res, http.StatusOK, updatedUser)
+	responses.ERROR(res, http.StatusUnprocessableEntity, errors.New("error updating user"))
 }
 
 func (server *Server) DeleteUserByID(res http.ResponseWriter, req *http.Request) {
-	vars := mux.Vars(req)
+	if req.Header.Get("Content-Type") == "applcation/json" {
+		vars := mux.Vars(req)
 	
-	user := models.User{}
+		user := models.User{}
 
-	uid, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		responses.ERROR(res, http.StatusBadRequest, err)
-		return
+		uid, err := strconv.ParseUint(vars["id"], 10, 32)
+		if err != nil {
+			responses.ERROR(res, http.StatusBadRequest, err)
+			return
+		}
+
+		tokenId, err := auth.ExtractTokenID(req)
+		if err != nil {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+			return
+		}
+
+		if tokenId != 0 && tokenId != uint32(uid) {
+			responses.ERROR(res, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
+			return
+		}
+
+		_, err = user.DeleteUser(server.DB, uint32(uid))
+		if err != nil {
+			responses.ERROR(res, http.StatusInternalServerError, err)
+			return
+		}
+
+		res.Header().Set("Entity", fmt.Sprintf("%d\n", uid))
+		responses.JSON(res, http.StatusNoContent, "success")
 	}
 
-	tokenId, err := auth.ExtractTokenID(req)
-	if err != nil {
-		responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
-		return
-	}
-
-	if tokenId != 0 && tokenId != uint32(uid) {
-		responses.ERROR(res, http.StatusUnauthorized, errors.New(http.StatusText(http.StatusUnauthorized)))
-		return
-	}
-
-	_, err = user.DeleteUser(server.DB, uint32(uid))
-	if err != nil {
-		responses.ERROR(res, http.StatusInternalServerError, err)
-		return
-	}
-
-	res.Header().Set("Entity", fmt.Sprintf("%d\n", uid))
-	responses.JSON(res, http.StatusNoContent, "success")
+	responses.ERROR(res, http.StatusUnprocessableEntity, errors.New("error deleting user"))
 }
