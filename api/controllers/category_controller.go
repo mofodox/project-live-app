@@ -74,6 +74,11 @@ func (server *Server) DeleteCategory(res http.ResponseWriter, req *http.Request)
 
 		var category models.Category
 
+		if err := server.DB.First(&category, category_id).Error; err != nil {
+			responses.ERROR(res, http.StatusNotFound, errors.New("category not found"))
+			return
+		}
+
 		if err := server.DB.Delete(&category, category_id).Error; err != nil {
 			responses.ERROR(res, http.StatusNotFound, errors.New("category not found"))
 			return
