@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/mux"
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
 	"golang.org/x/crypto/bcrypt"
@@ -127,4 +128,22 @@ func (server *Server) GetUsers(res http.ResponseWriter, req *http.Request) {
 	}
 
 	responses.JSON(res, http.StatusOK, users)
+}
+
+func (server *Server) GetUserById(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	uid, err := strconv.ParseUint(vars["id"], 10, 32)
+	if err != nil {
+		responses.ERROR(res, http.StatusBadRequest, err)
+		return
+	}
+
+	user := &models.User{}
+	userId, err := user.FindUserByID(server.DB, uint32(uid))
+	if err != nil {
+		responses.ERROR(res, http.StatusBadRequest, err)
+		return
+	}
+
+	responses.JSON(res, http.StatusOK, userId)
 }
