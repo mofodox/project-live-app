@@ -14,7 +14,7 @@ type Business struct {
 	Name        string    `gorm:"size:255;UNIQUE;not null" json:"name"`
 	Description string    `gorm:"type:text;not null" json:"description"` // 65,535 characters, rich text editor
 	Address     string    `gorm:"size:255;not null" json:"address"`
-	UnitNo      string    `json:"unitNo"`
+	UnitNo      string    `gorm:"size:255;not null" json:"unitNo"`
 	Zipcode     string    `gorm:"size:255;not null" json:"zipcode"`
 	Lat         float64   `gorm:"default:0" json:"lat"`
 	Lng         float64   `gorm:"default:0" json:"lng"`
