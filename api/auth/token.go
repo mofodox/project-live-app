@@ -8,9 +8,41 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
+
+func CreateToken(res http.ResponseWriter, userId uint32) (string, error) {
+	claims := jwt.MapClaims{}
+	claims["authorized"] = true
+	claims["user_id"] = userId
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() // Token expires after 1 hour
+
+	tk := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// ! OLD CODE - DON'T DELETE FIRST
+	// claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+	// 	Issuer: strconv.Itoa(int(userId)),
+	// 	ExpiresAt: time.Now().Add(time.Hour * 1).Unix(), // Expires in 1 hour
+	// })
+
+	token, err := tk.SignedString([]byte(os.Getenv("HBB_SECRET_KEY")))
+	if err != nil {
+		log.Fatalf("token error %s\n", err)
+	}
+
+	cookie := &http.Cookie {
+		Name: "jwt-token",
+		Value: token,
+		Expires: time.Now().Add(time.Hour * 1),
+		HttpOnly: true,
+	}
+
+	http.SetCookie(res, cookie)
+
+	return token, nil
+}
 
 func TokenValid(req *http.Request) error {
 	tokenString := ExtractToken(req)
