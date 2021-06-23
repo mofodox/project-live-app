@@ -13,6 +13,28 @@ import (
 	"github.com/mofodox/project-live-app/api/responses"
 )
 
+/*
+func (server *Server) UploadImage(res http.ResponseWriter, req *http.Request) {
+	fmt.Fprintf(res, "Uploading File")
+
+	// upload of 10 MB files.
+	req.ParseMultipartForm(10 << 20)
+
+	file, handler, err := req.FormFile("myFile")
+	if err != nil {
+		fmt.Println("Error Retrieving the File")
+		fmt.Println(err)
+		return
+	}
+	defer file.Close()
+	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
+	fmt.Printf("File Size: %+v\n", handler.Size)
+	fmt.Printf("MIME Header: %+v\n", handler.Header)
+
+	//var newFile models.File
+}
+*/
+
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {

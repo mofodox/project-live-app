@@ -20,14 +20,97 @@ var users = []models.User{
 	},
 }
 
+// https://thesmartlocal.com/read/home-based-businesses-singapore/
 var businesses = []models.Business{
 	models.Business{
-		Name:    "Shake Shack Orchard Road",
-		Address: "541 Orchard Rd, Liat Towers",
-		UnitNo:  "#01-01",
-		Zipcode: "238881",
-		Lat:     0,
-		Lng:     0,
+		Name:        "Eat My CB",
+		Description: "Homemade curry-stuffed buns",
+		Address:     "175C Punggol Field",
+		UnitNo:      "",
+		Zipcode:     "823175",
+		Lat:         0,
+		Lng:         0,
+		Website:     "https://eatmycb.sg/",
+		Instagram:   "https://www.instagram.com/eatmycb/",
+		Facebook:    "https://www.facebook.com/eatmycb/",
+	},
+
+	models.Business{
+		Name:        "Bekel Mama",
+		Description: "Homemade Malay food. Quality Malay food delights. $9 island wide delivery for lunch or dinner. Click on this link to ORDER: <a href=\"wa.me/6598266648\">https://wa.me/6598266648</a>",
+		Address:     "",
+		UnitNo:      "",
+		Zipcode:     "",
+		Lat:         0,
+		Lng:         0,
+		Website:     "",
+		Instagram:   "https://www.instagram.com/bekalmama.sg/",
+		Facebook:    "",
+	},
+
+	models.Business{
+		Name:        "Le Vyr - Locally fermented kombucha",
+		Description: "Brewed with an intense passion for our cuisine culture, our brews are inspired by and fermented with premium local ingredients.",
+		Address:     "King George's Building",
+		UnitNo:      "",
+		Zipcode:     "208580",
+		Lat:         0,
+		Lng:         0,
+		Website:     "https://www.levyrsg.com/",
+		Instagram:   "https://www.instagram.com/levyr.sg/",
+		Facebook:    "",
+	},
+
+	models.Business{
+		Name:        "Ms Chili SG – freshly made Indonesian keropok and chilli",
+		Description: "Bring Indonesian hometown flavours to you ❤️<br/>🌶️ Freshly made to order<br/>🌶️ Pre-order every Sunday<br/>🌶️ No pork / No lard<br/>Order here 👇🏻<br/><a href=\"https://mschili.cococart.co/\">https://mschili.cococart.co/</a>",
+		Address:     "",
+		UnitNo:      "",
+		Zipcode:     "",
+		Lat:         0,
+		Lng:         0,
+		Website:     "https://mschili.cococart.co/",
+		Instagram:   "https://www.instagram.com/ms.chili_sg/",
+		Facebook:    "",
+	},
+
+	models.Business{
+		Name:        "Upcakes – Mao Shan Wang chocolate cakes",
+		Description: "Calling all durian lovers: Upcakes has one of the best durian chocolate cakes ever, IMO. Not only is the cake extremely moist on the inside, the flavours of the chocolate and durian are also perfectly balanced, as all things should be.",
+		Address:     "Shelford Road",
+		UnitNo:      "",
+		Zipcode:     "288435",
+		Lat:         0,
+		Lng:         0,
+		Website:     "https://www.upcakes.sg/",
+		Instagram:   "https://www.instagram.com/upcakes.sg/",
+		Facebook:    "",
+	},
+
+	models.Business{
+		Name:        "Your Daily Batter - basque burnt cheesecakes",
+		Description: "DM to order!",
+		Address:     "Jalan Kayu",
+		UnitNo:      "",
+		Zipcode:     "",
+		Lat:         0,
+		Lng:         0,
+		Website:     "",
+		Instagram:   "https://www.instagram.com/p/CJbKiqPHsnH/",
+		Facebook:    "",
+	},
+
+	models.Business{
+		Name:        "Okieco - New York banana pudding by the pint",
+		Description: "Our Puddings are made from scratch, assembled by hand and contain only quality ingredients we approve of. Oh, and did we mention that they are made F R E S H?",
+		Address:     "8 Somapah Road, SUTD, Building 2",
+		UnitNo:      "#01-202A",
+		Zipcode:     "487372",
+		Lat:         0,
+		Lng:         0,
+		Website:     "https://www.okieco.sg/",
+		Instagram:   "https://www.instagram.com/okieco.sg/",
+		Facebook:    "",
 	},
 }
 
@@ -43,12 +126,12 @@ var categories = []models.Category{
 }
 
 func Load(db *gorm.DB) {
-	err := db.Debug().DropTableIfExists(&models.User{}, &models.Business{}).Error
+	err := db.Debug().DropTableIfExists(&models.User{}, &models.Business{}, &models.File{}).Error
 	if err != nil {
 		log.Fatalf("cannot drop table: %v\n", err)
 	}
 
-	err = db.Debug().AutoMigrate(&models.User{}, &models.Business{}).Error
+	err = db.Debug().AutoMigrate(&models.User{}, &models.Business{}, &models.File{}).Error
 	if err != nil {
 		log.Fatalf("cannot migrate table: %v\n", err)
 	}

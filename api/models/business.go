@@ -10,16 +10,20 @@ import (
 )
 
 type Business struct {
-	ID        uint32    `gorm:"PRIMARY_KEY;auto_increment" json:"id"`
-	Name      string    `gorm:"size:255;UNIQUE;not null" json:"name"`
-	Address   string    `gorm:"size:255;not null" json:"address"`
-	UnitNo    string    `json:"unitNo"`
-	Zipcode   string    `gorm:"size:255;not null" json:"zipcode"`
-	Lat       float64   `gorm:"default:0" json:"lat"`
-	Lng       float64   `gorm:"default:0" json:"lng"`
-	Status    string    `gorm:"default:'active'" json:"status"` // active / inactive (deleted)
-	CreatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	ID          uint32    `gorm:"PRIMARY_KEY;auto_increment" json:"id"`
+	Name        string    `gorm:"size:255;UNIQUE;not null" json:"name"`
+	Description string    `gorm:"type:text;not null" json:"description"` // 65,535 characters, rich text editor
+	Address     string    `gorm:"size:255;not null" json:"address"`
+	UnitNo      string    `json:"unitNo"`
+	Zipcode     string    `gorm:"size:255;not null" json:"zipcode"`
+	Lat         float64   `gorm:"default:0" json:"lat"`
+	Lng         float64   `gorm:"default:0" json:"lng"`
+	Status      string    `gorm:"default:'active'" json:"status"` // active / inactive (deleted)
+	Website     string    `gorm:"size:255;" json:"website"`
+	Instagram   string    `gorm:"size:255;" json:"instagram"`
+	Facebook    string    `gorm:"size:255;" json:"facebook"`
+	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
 // https://pkg.go.dev/googlemaps.github.io/maps?utm_source=godoc

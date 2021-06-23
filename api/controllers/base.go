@@ -13,7 +13,7 @@ import (
 )
 
 type Server struct {
-	DB *gorm.DB
+	DB     *gorm.DB
 	Router *mux.Router
 }
 
@@ -28,7 +28,7 @@ func (server *Server) Initialize() {
 	var DbName = os.Getenv("MYSQL_DATABASE")
 
 	// dbConnection = dbUsername + ":" + dbPassword + "@tcp(" + dbHostname + ":" + dbPort + ")/" + dbDatabase
-	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local", DbUser, DbPassword, DbHost, DbPort, DbName)
+	DBURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local", DbUser, DbPassword, DbHost, DbPort, DbName)
 
 	server.DB, err = gorm.Open(DbDriver, DBURL)
 	if err != nil {
