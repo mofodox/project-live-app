@@ -11,6 +11,7 @@ import (
 
 type Business struct {
 	ID          uint32    `gorm:"PRIMARY_KEY;auto_increment" json:"id"`
+	UserID      uint32    `gorm:"type:int;length:10" json:"userId"` // last user that edited. We're only keeping last edit.
 	Name        string    `gorm:"size:255;UNIQUE;not null" json:"name"`
 	Description string    `gorm:"type:text;not null" json:"description"` // 65,535 characters, rich text editor
 	Address     string    `gorm:"size:255;not null" json:"address"`
