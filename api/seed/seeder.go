@@ -132,6 +132,39 @@ var categories = []models.Category{
 	},
 }
 
+var comments = []models.Comment{
+	{
+		BusinessID: 1,
+		UserID:     1,
+		Content:    "Test comment 1",
+	},
+	{
+		BusinessID: 1,
+		UserID:     2,
+		Content:    "Test comment 2",
+	},
+	{
+		BusinessID: 2,
+		UserID:     1,
+		Content:    "Test comment 3",
+	},
+	{
+		BusinessID: 3,
+		UserID:     2,
+		Content:    "Test comment 4",
+	},
+	{
+		BusinessID: 3,
+		UserID:     2,
+		Content:    "Test comment 5",
+	},
+	{
+		BusinessID: 3,
+		UserID:     2,
+		Content:    "Test comment 6",
+	},
+}
+
 func Load(db *gorm.DB) {
 	err := db.Debug().DropTableIfExists(&models.User{}, &models.Business{}, &models.File{}).Error
 	if err != nil {
@@ -174,6 +207,21 @@ func Load(db *gorm.DB) {
 		err = db.Debug().Model(&models.Category{}).Create(&categories[i]).Error
 		if err != nil {
 			log.Fatalf("cannot seed categories table %v\n", err)
+		}
+	}
+
+	err = db.Debug().DropTableIfExists(&models.Comment{}).Error
+	if err != nil {
+		log.Fatalf("cannot drop table: %v\n", err)
+	}
+	err = db.Debug().AutoMigrate(&models.Comment{}).Error
+	if err != nil {
+		log.Fatalf("cannot migrate table: %v\n", err)
+	}
+	for i := range comments {
+		err = db.Debug().Model(&models.Comment{}).Create(&comments[i]).Error
+		if err != nil {
+			log.Fatalf("cannot seed coments table %v\n", err)
 		}
 	}
 }

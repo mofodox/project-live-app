@@ -47,11 +47,57 @@ func (server *Server) AddComment(res http.ResponseWriter, req *http.Request) {
 }
 
 func (server *Server) BusinessComments(res http.ResponseWriter, req *http.Request) {
-
+	if req.Header.Get("Content-type") == "application/json" {
+		vars := mux.Vars(req)
+		business_ID, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			responses.ERROR(res, http.StatusInternalServerError, err)
+		}
+		// Might chance to linked list later
+		bComments := []models.Comment{}
+		err = server.DB.Where("business_id = ?", business_ID).Find(&bComments).Error
+		if err != nil {
+			responses.ERROR(res, http.StatusNotFound, err)
+			return
+		}
+		responses.JSON(res, http.StatusOK, bComments)
+	}
 }
 
 func (server *Server) UserComments(res http.ResponseWriter, req *http.Request) {
+	if req.Header.Get("Content-type") == "application/json" {
+		vars := mux.Vars(req)
+		user_ID, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			responses.ERROR(res, http.StatusInternalServerError, err)
+		}
+		// Might chance to linked list later
+		uComments := []models.Comment{}
+		err = server.DB.Where("user_id = ?", user_ID).Find(&uComments).Error
+		if err != nil {
+			responses.ERROR(res, http.StatusNotFound, err)
+			return
+		}
+		responses.JSON(res, http.StatusOK, uComments)
+	}
+}
 
+func (server *Server) GetComment(res http.ResponseWriter, req *http.Request) {
+	if req.Header.Get("Content-type") == "application/json" {
+		vars := mux.Vars(req)
+		comment_ID, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			responses.ERROR(res, http.StatusInternalServerError, err)
+			return
+		}
+		comment := models.Comment{}
+		err = server.DB.First(&comment, comment_ID).Error
+		if err != nil {
+			responses.ERROR(res, http.StatusNotFound, err)
+			return
+		}
+		responses.JSON(res, http.StatusOK, comment)
+	}
 }
 
 func (server *Server) EditComments(res http.ResponseWriter, req *http.Request) {
@@ -66,7 +112,7 @@ func (server *Server) EditComments(res http.ResponseWriter, req *http.Request) {
 			responses.ERROR(res, http.StatusInternalServerError, err)
 			return
 		}
-		var currentComment models.Comment
+		currentComment := models.Comment{}
 		err = server.DB.First(&currentComment, comment_ID).Error
 		if err != nil {
 			responses.ERROR(res, http.StatusNotFound, err)
@@ -108,7 +154,7 @@ func (server *Server) RemoveComments(res http.ResponseWriter, req *http.Request)
 			responses.ERROR(res, http.StatusInternalServerError, err)
 			return
 		}
-		var currentComment models.Comment
+		currentComment := models.Comment{}
 		err = server.DB.First(&currentComment, comment_ID).Error
 		if err != nil {
 			responses.ERROR(res, http.StatusNotFound, err)
