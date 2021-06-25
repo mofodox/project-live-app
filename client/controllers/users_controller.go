@@ -34,7 +34,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 
 		data, err := json.Marshal(map[string]string{
 			"fullname": fullname,
-			"email": email,
+			"email":    email,
 			"password": password,
 		})
 		if err != nil {
@@ -85,13 +85,13 @@ func Login(res http.ResponseWriter, req *http.Request) {
 
 	if req.Method == http.MethodPost {
 		client := &http.Client{}
-		
+
 		email := req.FormValue("email")
 		password := req.FormValue("password")
 
 		// Marshal struct to json
 		data, err := json.Marshal(map[string]string{
-			"email": email,
+			"email":    email,
 			"password": password,
 		})
 		if err != nil {
@@ -121,19 +121,17 @@ func Login(res http.ResponseWriter, req *http.Request) {
 			log.Fatalf("error repsonse body occurred %v\n", err)
 		}
 
-		// fmt.Printf("respBody: %v\n", string(respBody))
-
 		tokenString := string(respBody)
-		removeQuote := strings.ReplaceAll(tokenString, "\"", "")
-		replace := strings.ReplaceAll(removeQuote, "\r\n", "")
-
-		fmt.Printf("replaceToken %v\n", replace)
+		tokenString = strings.TrimSuffix(tokenString, "\n")
+		tokenString = strings.ReplaceAll(tokenString, "\"", "")
 
 		cookie := &http.Cookie{
-			Name: "jwt-token",
-			Value: replace,
+			Name:    "jwt-token",
+			Value:   tokenString,
 			Expires: time.Now().Add(time.Hour * 1),
 		}
+
+		fmt.Println(cookie)
 
 		http.SetCookie(res, cookie)
 		http.Redirect(res, req, "/", http.StatusOK)
