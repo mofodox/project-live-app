@@ -44,7 +44,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Fatalf("error response occurred %v\n", err)
 		}
-		
+
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := client.Do(req)
@@ -63,6 +63,8 @@ func Register(res http.ResponseWriter, req *http.Request) {
 			log.Fatal(err)
 		}
 		log.Println("User registered")
+
+		http.Redirect(res, req, "/", http.StatusCreated)
 	}
 }
 
