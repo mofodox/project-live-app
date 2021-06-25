@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -14,31 +13,6 @@ import (
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
 )
-
-// Temp frontend page
-func (server *Server) CreateBusinessPage(res http.ResponseWriter, req *http.Request) {
-
-	fmt.Println("CREATE BUSINESS PAGEEEEE")
-
-	// Anonymous payload
-	payload := struct {
-		PageTitle  string
-		User       *models.User
-		ErrorMsg   string
-		SuccessMsg string
-	}{
-		"Create Business", nil, "", "",
-	}
-
-	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
-}
-
-func (server *Server) ProcessBusinessPageForm(res http.ResponseWriter, req *http.Request) {
-
-	fmt.Println("PROCESS CREATE BUSINESS FORM")
-
-	//
-}
 
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
