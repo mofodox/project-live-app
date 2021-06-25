@@ -157,11 +157,12 @@ func (server *Server) DeleteCategory(res http.ResponseWriter, req *http.Request)
 
 func (server *Server) UpdateCategory(res http.ResponseWriter, req *http.Request) {
 	if req.Header.Get("Content-type") == "application/json" {
-		userId, err := auth.ExtractTokenID(req)
-		if err != nil {
-			responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
-			return
-		}
+		var userId uint32 = 1
+		// userId, err := auth.ExtractTokenID(req)
+		// if err != nil {
+		// 	responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+		// 	return
+		// }
 
 		vars := mux.Vars(req)
 		category_id, err := strconv.Atoi(vars["id"])
