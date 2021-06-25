@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"text/template"
 
 	"github.com/mofodox/project-live-app/api/models"
 )
@@ -65,14 +64,16 @@ func Register(res http.ResponseWriter, req *http.Request) {
 }
 
 func Login(res http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodGet {
-		t, err := template.ParseFiles("templates/login.gohtml")
-		if err != nil {
-			log.Fatalf("template parse file error %v\n", err)
-		}
-
-		t.Execute(res, nil)
+	// Anonymous payload
+	payload := struct {
+		PageTitle  string
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"User Login", "", "",
 	}
+
+	tpl.ExecuteTemplate(res, "login.gohtml", payload)
 
 	if req.Method == http.MethodPost {
 		email := req.FormValue("email")
