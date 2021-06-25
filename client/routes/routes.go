@@ -26,6 +26,9 @@ func HandleRoutes(addr string) {
 		router.HandleFunc("/business/update/{id}", controllers.UpdateBusinessPage).Methods("GET")
 	*/
 
+	// Category Handlers
+	router.HandleFunc("/category/create", controllers.CreateCategoryPage).Methods("GET")
+
 	router.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
 
 	log.Printf("Starting server on port %s\n", addr)
