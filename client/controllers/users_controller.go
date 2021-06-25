@@ -3,9 +3,12 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/mofodox/project-live-app/api/models"
 )
@@ -81,9 +84,12 @@ func Login(res http.ResponseWriter, req *http.Request) {
 	tpl.ExecuteTemplate(res, "login.gohtml", payload)
 
 	if req.Method == http.MethodPost {
+		client := &http.Client{}
+		
 		email := req.FormValue("email")
 		password := req.FormValue("password")
 
+		// Marshal struct to json
 		data, err := json.Marshal(map[string]string{
 			"email": email,
 			"password": password,
@@ -92,28 +98,44 @@ func Login(res http.ResponseWriter, req *http.Request) {
 			log.Fatalf("login error %v\n", err)
 		}
 
-		respBody := bytes.NewBuffer(data)
+		responseBuffer := bytes.NewBuffer(data)
 
-		response, err := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", respBody)
+		req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", responseBuffer)
 		if err != nil {
 			log.Fatalf("error response occured %v\n", err)
 		}
 
-		defer response.Body.Close()
+		req.Header.Set("Content-Type", "application/json")
+		c := req.Cookies()
+		fmt.Printf("cookies: %s\n", c)
 
-		body, err := ioutil.ReadAll(response.Body)
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer resp.Body.Close()
+
+		respBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatalf("error repsonse body occurred %v\n", err)
 		}
 
-		err = json.Unmarshal(body, &models.User{})
-		if err != nil {
-			log.Printf("error json user{} %v\n", err)
-			return
+		// fmt.Printf("respBody: %v\n", string(respBody))
+
+		tokenString := string(respBody)
+		removeQuote := strings.ReplaceAll(tokenString, "\"", "")
+		replace := strings.ReplaceAll(removeQuote, "\r\n", "")
+
+		fmt.Printf("replaceToken %v\n", replace)
+
+		cookie := &http.Cookie{
+			Name: "jwt-token",
+			Value: replace,
+			Expires: time.Now().Add(time.Hour * 1),
 		}
 
-		log.Printf("user logged in")
-
-		http.Redirect(res, req, "/", http.StatusCreated)
+		http.SetCookie(res, cookie)
+		http.Redirect(res, req, "/", http.StatusOK)
 	}
 }
