@@ -14,7 +14,7 @@ func HandleRoutes(addr string) {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", controllers.Home)
-	router.HandleFunc("/register", controllers.Register).Methods("POST")
+	router.HandleFunc("/register", controllers.Register).Methods("POST", "GET")
 	router.HandleFunc("/login", controllers.Login).Methods("POST", "GET")
 
 	// Business Handlers

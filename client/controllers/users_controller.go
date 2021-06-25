@@ -56,10 +56,6 @@ func Register(res http.ResponseWriter, req *http.Request) {
 			log.Printf("error json user{} %v\n", err)
 			return
 		}
-
-		log.Printf("user registered")
-
-		http.Redirect(res, req, "/", http.StatusCreated)
 	}
 }
 
