@@ -46,9 +46,9 @@ func (server *Server) Register(res http.ResponseWriter, req *http.Request) {
 		
 		res.Header().Set("Location", fmt.Sprintf("%s%s/%d", req.Host, req.RequestURI, userCreated.ID))
 		responses.JSON(res, http.StatusCreated, userCreated)
+	} else {
+		responses.ERROR(res, http.StatusBadRequest, errors.New("user not registered"))
 	}
-
-	responses.ERROR(res, http.StatusInternalServerError, errors.New("internal server error"))
 }
 
 func (server *Server) Login(res http.ResponseWriter, req *http.Request) {
@@ -81,9 +81,9 @@ func (server *Server) Login(res http.ResponseWriter, req *http.Request) {
 		}
 
 		responses.JSON(res, http.StatusOK, token)
+	} else {
+		responses.ERROR(res, http.StatusNotFound, errors.New("user not found"))
 	}
-
-	responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
 }
 
 func (server *Server) SignInUser(res http.ResponseWriter, email, password string) (string, error) {
@@ -126,9 +126,9 @@ func (server *Server) GetUsers(res http.ResponseWriter, req *http.Request) {
 		}
 
 		responses.JSON(res, http.StatusOK, users)
+	} else {
+		responses.ERROR(res, http.StatusNotFound, errors.New("users not found"))
 	}
-
-	responses.ERROR(res, http.StatusNotFound, errors.New("user not found"))
 }
 
 func (server *Server) GetUserById(res http.ResponseWriter, req *http.Request) {
@@ -148,9 +148,9 @@ func (server *Server) GetUserById(res http.ResponseWriter, req *http.Request) {
 		}
 
 		responses.JSON(res, http.StatusOK, userId)
+	} else {
+		responses.ERROR(res, http.StatusNotFound, errors.New("user not found"))
 	}
-
-	responses.ERROR(res, http.StatusNotFound, errors.New("user not found"))
 }
 
 func (server *Server) UpdateUserById(res http.ResponseWriter, req *http.Request) {
@@ -201,9 +201,9 @@ func (server *Server) UpdateUserById(res http.ResponseWriter, req *http.Request)
 		}
 
 		responses.JSON(res, http.StatusOK, updatedUser)
+	} else {
+		responses.ERROR(res, http.StatusUnprocessableEntity, errors.New("error updating user"))
 	}
-
-	responses.ERROR(res, http.StatusUnprocessableEntity, errors.New("error updating user"))
 }
 
 func (server *Server) DeleteUserByID(res http.ResponseWriter, req *http.Request) {
@@ -237,7 +237,7 @@ func (server *Server) DeleteUserByID(res http.ResponseWriter, req *http.Request)
 
 		res.Header().Set("Entity", fmt.Sprintf("%d\n", uid))
 		responses.JSON(res, http.StatusNoContent, "success")
+	} else {
+		responses.ERROR(res, http.StatusUnprocessableEntity, errors.New("error deleting user"))
 	}
-
-	responses.ERROR(res, http.StatusUnprocessableEntity, errors.New("error deleting user"))
 }
