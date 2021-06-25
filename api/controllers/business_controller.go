@@ -18,7 +18,7 @@ import (
 // Temp frontend page
 func (server *Server) CreateBusinessPage(res http.ResponseWriter, req *http.Request) {
 
-	fmt.Println("CREATE BUSINESS PAGEEEEE")
+	fmt.Println("CREATE BUSINESS PAGE")
 
 	// Anonymous payload
 	payload := struct {
@@ -33,11 +33,71 @@ func (server *Server) CreateBusinessPage(res http.ResponseWriter, req *http.Requ
 	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 }
 
+func (server *Server) UpdateBusinessPage(res http.ResponseWriter, req *http.Request) {
+
+	fmt.Println("UPDATE BUSINESS FORM")
+
+	vars := mux.Vars(req)
+	business_id, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		// Redirect to Index Page
+		http.Redirect(res, req, "/", http.StatusNotFound)
+		return
+	}
+
+	var business *models.Business
+
+	if err := server.DB.First(&business, business_id).Error; err != nil {
+		// Redirect to Index Page
+		http.Redirect(res, req, "/", http.StatusNotFound)
+		return
+	}
+
+	fmt.Println(business)
+
+	// Anonymous payload
+	payload := struct {
+		PageTitle  string
+		User       *models.User
+		Business   *models.Business
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"Update Business", nil, business, "", "",
+	}
+
+	tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
+}
+
 func (server *Server) ProcessBusinessPageForm(res http.ResponseWriter, req *http.Request) {
 
-	fmt.Println("PROCESS CREATE BUSINESS FORM")
+	businessName := req.FormValue("name")
+	description := req.FormValue("description")
+	address := req.FormValue("address")
+	zipcode := req.FormValue("zipcode")
+	unitno := req.FormValue("unitno")
+	website := req.FormValue("website")
+	instagram := req.FormValue("instagram")
+	facebook := req.FormValue("facebook")
 
-	//
+	var newBusiness *models.Business
+
+	newBusiness.Name = businessName
+	newBusiness.Description = description
+	newBusiness.Address = address
+	newBusiness.Zipcode = zipcode
+	newBusiness.UnitNo = unitno
+	newBusiness.Website = website
+	newBusiness.Instagram = instagram
+	newBusiness.Facebook = facebook
+
+	newBusiness.Geocode()
+
+	server.DB.Create(&newBusiness)
+
+	// Redirect to Index Page
+	http.Redirect(res, req, "/", http.StatusOK)
 }
 
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
@@ -51,7 +111,7 @@ func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request)
 			return
 		}
 
-		var newBusiness models.Business
+		var newBusiness *models.Business
 		reqBody, err := ioutil.ReadAll(req.Body)
 
 		if err == nil {

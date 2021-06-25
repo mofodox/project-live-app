@@ -40,6 +40,7 @@ func (server *Server) initializeRoutes() {
 	// Temp non api frontend pages
 	server.Router.HandleFunc("/business/create", server.CreateBusinessPage).Methods("GET")
 	server.Router.HandleFunc("/business/create", server.ProcessBusinessPageForm).Methods("POST")
+	server.Router.HandleFunc("/business/update/{id}", server.UpdateBusinessPage).Methods("GET")
 
 	/**
 	 * Category routes
