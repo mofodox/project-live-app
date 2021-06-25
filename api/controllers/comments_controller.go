@@ -105,6 +105,7 @@ func (server *Server) EditComments(res http.ResponseWriter, req *http.Request) {
 		userID, err := auth.ExtractTokenID(req)
 		if err != nil {
 			responses.ERROR(res, http.StatusUnauthorized, errors.New("no authorization"))
+			return
 		}
 		vars := mux.Vars(req)
 		comment_ID, err := strconv.Atoi(vars["id"])
