@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {{template "header" .}}
+    </head>
+    <body>
+        <div class="container">
+            {{template "nav" .}}
+
+            <h1>Update Category - {{ .Category.Name }}</h1>
+
+            <hr/>
+
+            <form method="post">
+                <div class="form-group mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input class="form-control" type="text" name="name" value="{{ .Category.Name }}" placeholder="Category name">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <input class="form-control" type="text" name="description" value="{{ .Category.Description }}" placeholder="Brief category description">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-purple mb-3">Submit</button>
+            </form>
+
+            {{template "footer"}}
+        </div>
+    </body>
+</html>

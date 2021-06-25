@@ -73,6 +73,7 @@ func (server *Server) CreateCategory(res http.ResponseWriter, req *http.Request)
 		*/
 		var newCategory models.Category
 		reqBody, err := ioutil.ReadAll(req.Body)
+		fmt.Println(reqBody)
 
 		if err == nil {
 			// convert JSON to object
@@ -80,6 +81,7 @@ func (server *Server) CreateCategory(res http.ResponseWriter, req *http.Request)
 			newCategory.UserID = userId
 
 			result := server.DB.Create(&newCategory)
+			fmt.Println(result)
 
 			if result.Error != nil {
 				responses.ERROR(res, http.StatusInternalServerError, result.Error)
