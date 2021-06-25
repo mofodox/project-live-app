@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {{template "header" .}}
+    </head>
+    <body>
+        <div class="container">
+            {{template "nav" .}}
+
+            <h1>{{ .Business.Name }}</h1>
+
+            <hr/>
+
+            <div>
+                {{ if .Business.Description }}
+                <div>{{ .Business.Description }}</div>
+                {{ end }}
+
+                {{ if .Business.Address }}
+                <div>{{ .Business.Address }}</div>
+                {{ end }}
+
+                {{ if .Business.UnitNo }}
+                <div>{{ .Business.UnitNo }}</div>
+                {{ end }}
+
+                {{ if .Business.Zipcode }}
+                <div>{{ .Business.Zipcode }}</div>
+                {{ end }}
+
+                {{ if .Business.Website }}
+                <div><a href="{{ .Business.Website }}" target="_blank">{{ .Business.Website }}</a></div>
+                {{ end }}
+
+                {{ if .Business.Instagram }}
+                <div><a href="{{ .Business.Instagram }}" target="_blank">{{ .Business.Instagram }}</a></div>
+                {{ end }}
+
+                {{ if .Business.Facebook }}
+                <div><a href="{{ .Business.Facebook }}" target="_blank">{{ .Business.Facebook }}</a></div>
+                {{ end }}
+            </div>
+
+            {{ if and .Business.Lat .Business.Lng }}
+            <div id="map" style="min-height: 500px; width: 100%; height:100%"></div>
+
+            <script src="https://maps.googleapis.com/maps/api/js?key={{ .GMapsAPIKey }}&callback=initMap&libraries=&v=weekly" async></script>
+            <script>
+            // Initialize and add the map
+            function initMap() {
+                const pos = { lat: {{ .Business.Lat }}, lng: {{ .Business.Lng }} };
+                const map = new google.maps.Map(document.getElementById("map"), {
+                    zoom: 18,
+                    center: pos,
+                });
+                const marker = new google.maps.Marker({
+                    position: pos,
+                    map: map
+                });
+            }
+            </script>
+            {{ end }}
+
+            {{template "footer"}}
+        </div>
+    </body>
+</html>
