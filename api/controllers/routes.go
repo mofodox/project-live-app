@@ -1,12 +1,16 @@
 package controllers
 
-import "github.com/mofodox/project-live-app/api/middlewares"
+import (
+	"net/http"
+
+	"github.com/mofodox/project-live-app/api/middlewares"
+)
 
 func (server *Server) initializeRoutes() {
 	defaultURI := "/api/v1"
 
 	/**
-	* User routes
+	 * User routes
 	 */
 	server.Router.HandleFunc(defaultURI+"/users", middlewares.SetMiddlewareJSON(server.Register)).Methods("POST")
 	server.Router.HandleFunc(defaultURI+"/users/login", middlewares.SetMiddlewareJSON(server.Login)).Methods("POST")
@@ -17,7 +21,7 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/users/{id}", middlewares.SetMiddlewareAuthentication(server.DeleteUserByID)).Methods("DELETE")
 
 	/**
-	* Business routes
+	 * Business routes
 	 */
 	server.Router.HandleFunc(defaultURI+"/businesses", server.SearchBusinesses).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/businesses/{id:[0-9]+}", server.GetBusiness).Methods("GET")
@@ -26,7 +30,7 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/businesses/{id:[0-9]+}", server.DeleteBusiness).Methods("DELETE")
 
 	/**
-	* Category routes
+	 * Category routes
 	 */
 	server.Router.HandleFunc(defaultURI+"/categories/", server.CreateCategory).Methods("POST")
 	server.Router.HandleFunc(defaultURI+"/categories/", server.GetAllCategory).Methods("GET")
@@ -35,7 +39,10 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/categories/{id:[0-9]+}", server.UpdateCategory).Methods("PUT")
 
 	/**
-	* API Health check route
+	 * API Health check route
 	 */
 	server.Router.HandleFunc(defaultURI+"/health", server.Health).Methods("GET")
+
+	fs := http.FileServer(http.Dir("./public"))
+	server.Router.PathPrefix("/css/").Handler(fs)
 }

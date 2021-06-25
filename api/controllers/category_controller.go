@@ -12,6 +12,31 @@ import (
 	"github.com/mofodox/project-live-app/api/responses"
 )
 
+func (server *Server) SearchCategory(res http.ResponseWriter, req *http.Request) {
+	if req.Header.Get("Content-type") == "application/json" {
+		name := req.FormValue("name")
+
+		var categories = []models.Category{}
+
+		result := server.DB.Limit(10)
+
+		if name != "" {
+			result = result.Where("name LIKE ?", "%"+name+"%")
+		}
+
+		result = result.Find(&categories).Order("name")
+
+		if result.Error != nil {
+			responses.ERROR(res, http.StatusInternalServerError, result.Error)
+			return
+		}
+
+		responses.JSON(res, http.StatusOK, categories)
+		return
+	}
+	responses.ERROR(res, http.StatusNotFound, errors.New("business not found"))
+}
+
 func (server *Server) GetAllCategory(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
