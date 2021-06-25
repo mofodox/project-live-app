@@ -44,6 +44,7 @@ func (server *Server) initializeRoutes() {
 	 * Category routes
 	 */
 	server.Router.HandleFunc(defaultURI+"/categories/", server.CreateCategory).Methods("POST")
+	server.Router.HandleFunc(defaultURI+"/categories/", server.GetAllCategory).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/categories/{id:[0-9]+}", server.GetCategory).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/categories/{id:[0-9]+}", server.DeleteCategory).Methods("DELETE")
 	server.Router.HandleFunc(defaultURI+"/categories/{id:[0-9]+}", server.UpdateCategory).Methods("PUT")
