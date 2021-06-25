@@ -1,12 +1,24 @@
 package controllers
 
-import "github.com/mofodox/project-live-app/api/middlewares"
+import (
+	"net/http"
+	"text/template"
+
+	"github.com/mofodox/project-live-app/api/middlewares"
+)
+
+// Temp for frontend dev
+var tpl *template.Template
+
+func init() {
+	tpl = template.Must(template.New("").ParseGlob("templates/*"))
+}
 
 func (server *Server) initializeRoutes() {
 	defaultURI := "/api/v1"
 
 	/**
-	* User routes
+	 * User routes
 	 */
 	server.Router.HandleFunc(defaultURI+"/users", middlewares.SetMiddlewareJSON(server.Register)).Methods("POST")
 	server.Router.HandleFunc(defaultURI+"/users/login", middlewares.SetMiddlewareJSON(server.Login)).Methods("POST")
@@ -17,7 +29,7 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/users/{id}", middlewares.SetMiddlewareAuthentication(server.DeleteUserByID)).Methods("DELETE")
 
 	/**
-	* Business routes
+	 * Business routes
 	 */
 	server.Router.HandleFunc(defaultURI+"/businesses", server.SearchBusinesses).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/businesses/{id:[0-9]+}", server.GetBusiness).Methods("GET")
@@ -25,8 +37,11 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/businesses/{id:[0-9]+}", server.UpdateBusiness).Methods("PUT")
 	server.Router.HandleFunc(defaultURI+"/businesses/{id:[0-9]+}", server.DeleteBusiness).Methods("DELETE")
 
+	// Temp non api frontend pages
+	server.Router.HandleFunc("/business/create", server.CreateBusinessPage).Methods("GET")
+
 	/**
-	* Category routes
+	 * Category routes
 	 */
 	server.Router.HandleFunc(defaultURI+"/categories/", server.CreateCategory).Methods("POST")
 	server.Router.HandleFunc(defaultURI+"/categories/{id:[0-9]+}", server.GetCategory).Methods("GET")
@@ -34,7 +49,10 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/categories/{id:[0-9]+}", server.UpdateCategory).Methods("PUT")
 
 	/**
-	* API Health check route
+	 * API Health check route
 	 */
 	server.Router.HandleFunc(defaultURI+"/health", server.Health).Methods("GET")
+
+	fs := http.FileServer(http.Dir("./public"))
+	server.Router.PathPrefix("/css/").Handler(fs)
 }
