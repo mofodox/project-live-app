@@ -243,7 +243,7 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 		SuccessMsg  string
 		GMapsAPIKey string
 	}{
-		"Update Business", nil, "", "", os.Getenv("GMapsPublicAPI"),
+		"View Business", nil, "", "", os.Getenv("GMapsPublicAPI"),
 	}
 
 	// Todo: add cookie check and send JWT with request
@@ -268,6 +268,7 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 			fmt.Println("Error decoding json")
 		}
 
+		payload.PageTitle = business.Name
 		payload.Business = business
 
 		tpl.ExecuteTemplate(res, "viewBusiness.gohtml", payload)
