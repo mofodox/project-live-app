@@ -6,21 +6,25 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"text/template"
 
 	"github.com/mofodox/project-live-app/api/models"
 )
 
 func Register(res http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodGet {
-		t, err := template.ParseFiles("templates/register.gohtml")
-		if err != nil {
-			log.Fatalf("template parse file error %v\n", err)
-		}
-		t.Execute(res, nil)
+	// Anonymous payload
+	payload := struct {
+		PageTitle  string
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"User Register", "", "",
 	}
 
+	tpl.ExecuteTemplate(res, "register.gohtml", payload)
+
 	if req.Method == http.MethodPost {
+		client := &http.Client{}
+
 		fullname := req.FormValue("fullname")
 		email := req.FormValue("email")
 		password := req.FormValue("password")
@@ -34,41 +38,45 @@ func Register(res http.ResponseWriter, req *http.Request) {
 			log.Fatalf("register error %v\n", err)
 		}
 
-		respBody := bytes.NewBuffer(data)
+		responseBuffer := bytes.NewBuffer(data)
 
-		response, err := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users", respBody)
+		req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users", responseBuffer)
 		if err != nil {
 			log.Fatalf("error response occurred %v\n", err)
 		}
+		
+		req.Header.Set("Content-Type", "application/json")
 
-		defer response.Body.Close()
-
-		body, err := ioutil.ReadAll(response.Body)
+		resp, err := client.Do(req)
 		if err != nil {
-			log.Fatalf("error response body occurred %v\n", err)
+			log.Fatal(err)
 		}
 
-		err = json.Unmarshal(body, &models.User{})
+		defer resp.Body.Close()
+
+		respBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			log.Printf("error json user{} %v\n", err)
-			return
+			log.Fatal(err)
 		}
 
-		log.Printf("user registered")
-
-		http.Redirect(res, req, "/", http.StatusCreated)
+		if err := json.Unmarshal(respBody, &models.User{}); err != nil {
+			log.Fatal(err)
+		}
+		log.Println("User registered")
 	}
 }
 
 func Login(res http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodGet {
-		t, err := template.ParseFiles("templates/login.gohtml")
-		if err != nil {
-			log.Fatalf("template parse file error %v\n", err)
-		}
-
-		t.Execute(res, nil)
+	// Anonymous payload
+	payload := struct {
+		PageTitle  string
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"User Login", "", "",
 	}
+
+	tpl.ExecuteTemplate(res, "login.gohtml", payload)
 
 	if req.Method == http.MethodPost {
 		email := req.FormValue("email")

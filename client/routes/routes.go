@@ -13,7 +13,7 @@ func HandleRoutes(addr string) {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/", controllers.Home)
-	router.HandleFunc("/register", controllers.Register).Methods("POST")
+	router.HandleFunc("/register", controllers.Register).Methods("POST", "GET")
 	router.HandleFunc("/login", controllers.Login).Methods("POST", "GET")
 
 	// Business Handlers
@@ -24,6 +24,9 @@ func HandleRoutes(addr string) {
 		router.HandleFunc("/business/create", controllers.ProcessBusinessPageForm).Methods("POST")
 		router.HandleFunc("/business/update/{id}", controllers.UpdateBusinessPage).Methods("GET")
 	*/
+
+	// Category Handlers
+	router.HandleFunc("/category/create", controllers.CreateCategoryPage).Methods("GET")
 
 	fs := http.FileServer(http.Dir("./public"))
 	router.PathPrefix("/css/").Handler(fs)

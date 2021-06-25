@@ -133,12 +133,12 @@ var categories = []models.Category{
 }
 
 func Load(db *gorm.DB) {
-	err := db.Debug().DropTableIfExists(&models.User{}, &models.Business{}, &models.File{}).Error
+	err := db.Debug().DropTableIfExists(&models.User{}, &models.Business{}, &models.File{}, &models.Category{}).Error
 	if err != nil {
 		log.Fatalf("cannot drop table: %v\n", err)
 	}
 
-	err = db.Debug().AutoMigrate(&models.User{}, &models.Business{}, &models.File{}).Error
+	err = db.Debug().AutoMigrate(&models.User{}, &models.Business{}, &models.File{}, &models.Category{}).Error
 	if err != nil {
 		log.Fatalf("cannot migrate table: %v\n", err)
 	}
@@ -158,16 +158,6 @@ func Load(db *gorm.DB) {
 		if err != nil {
 			log.Fatalf("cannot seed business table %v\n", err)
 		}
-	}
-
-	err2 := db.Debug().DropTableIfExists(&models.Category{}).Error
-	if err2 != nil {
-		log.Fatalf("cannot drop table: %v\n", err)
-	}
-
-	err = db.Debug().AutoMigrate(&models.Category{}).Error
-	if err != nil {
-		log.Fatalf("cannot migrate table: %v\n", err)
 	}
 
 	for i := range categories {
