@@ -33,6 +33,13 @@ func (server *Server) CreateBusinessPage(res http.ResponseWriter, req *http.Requ
 	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 }
 
+func (server *Server) ProcessBusinessPageForm(res http.ResponseWriter, req *http.Request) {
+
+	fmt.Println("PROCESS CREATE BUSINESS FORM")
+
+	//
+}
+
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
