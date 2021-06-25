@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -16,16 +17,24 @@ import (
 
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
+	fmt.Println("CREATING BUSINESS")
+
 	if req.Header.Get("Content-type") == "application/json" {
 
-		// check JWT and get user id
-		userId, err := auth.ExtractTokenID(req)
-		if err != nil {
-			responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
-			return
-		}
+		fmt.Println("CREATING BUSINESS WITH CORRECT CONTENT TYPE")
 
-		var newBusiness models.Business
+		var userId uint32 = 1
+
+		/*
+			// check JWT and get user id
+			userId, err := auth.ExtractTokenID(req)
+			if err != nil {
+				responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+				return
+			}
+		*/
+
+		var newBusiness *models.Business
 		reqBody, err := ioutil.ReadAll(req.Body)
 
 		if err == nil {
@@ -103,12 +112,16 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 
 	if req.Header.Get("Content-type") == "application/json" {
 
-		// check JWT and get user id
-		userId, err := auth.ExtractTokenID(req)
-		if err != nil {
-			responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
-			return
-		}
+		var userId uint32 = 1
+
+		/*
+			// check JWT and get user id
+			userId, err := auth.ExtractTokenID(req)
+			if err != nil {
+				responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+				return
+			}
+		*/
 
 		vars := mux.Vars(req)
 		business_id, err := strconv.Atoi(vars["id"])
