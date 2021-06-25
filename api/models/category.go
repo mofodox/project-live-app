@@ -7,6 +7,7 @@ import (
 type Category struct {
 	//gorm.Model
 	ID          uint32    `gorm:"primary_key;auto_increment;" json:"id"`
+	UserID      uint32    `gorm:"type:int(10);not null" json:"userId"`
 	ParentID    int32     `gorm:"size:255;default:1" json:"parentid"`
 	Name        string    `gorm:"size:255;not_nulls" json:"name"`
 	Description string    `gorm:"size:255;not_nulls" json:"description"`
