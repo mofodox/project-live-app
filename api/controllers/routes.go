@@ -45,10 +45,10 @@ func (server *Server) initializeRoutes() {
 	server.Router.HandleFunc(defaultURI+"/users/{id}/comments", server.UserComments).Methods("GET")
 	server.Router.HandleFunc(defaultURI+"/business/{id:[0-9]+}/comments/",
 		server.BusinessComments).Methods("GET")
-	server.Router.HandleFunc(defaultURI+"/business/{id:[0-9]+}/comments/",
+	server.Router.HandleFunc(defaultURI+"/comment/",
 		server.AddComment).Methods("POST")
-	server.Router.HandleFunc(defaultURI+"/comments/{id:[0-9]+}", server.EditComments).Methods("PUT")
-	server.Router.HandleFunc(defaultURI+"/comments/{id:[0-9]+}", server.RemoveComments).Methods("DELETE")
+	server.Router.HandleFunc(defaultURI+"/comment/{id:[0-9]+}", server.EditComments).Methods("PUT")
+	server.Router.HandleFunc(defaultURI+"/comment/{id:[0-9]+}", server.RemoveComments).Methods("DELETE")
 
 	/**
 	 * API Health check route
