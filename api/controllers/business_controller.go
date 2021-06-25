@@ -112,12 +112,16 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 
 	if req.Header.Get("Content-type") == "application/json" {
 
-		// check JWT and get user id
-		userId, err := auth.ExtractTokenID(req)
-		if err != nil {
-			responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
-			return
-		}
+		var userId uint32 = 1
+
+		/*
+			// check JWT and get user id
+			userId, err := auth.ExtractTokenID(req)
+			if err != nil {
+				responses.ERROR(res, http.StatusUnauthorized, errors.New("unauthorized"))
+				return
+			}
+		*/
 
 		vars := mux.Vars(req)
 		business_id, err := strconv.Atoi(vars["id"])
