@@ -17,13 +17,10 @@ func HandleRoutes(addr string) {
 	router.HandleFunc("/login", controllers.Login).Methods("POST", "GET")
 
 	// Business Handlers
-	router.HandleFunc("/business/create", controllers.CreateBusinessPage).Methods("GET")
-	router.HandleFunc("/business/create", controllers.ProcessBusinessPageForm).Methods("POST")
-
-	/*
-		router.HandleFunc("/business/create", controllers.ProcessBusinessPageForm).Methods("POST")
-		router.HandleFunc("/business/update/{id}", controllers.UpdateBusinessPage).Methods("GET")
-	*/
+	router.HandleFunc("/business/create", controllers.CreateBusiness).Methods("GET")
+	router.HandleFunc("/business/create", controllers.ProcessCreateBusiness).Methods("POST")
+	router.HandleFunc("/business/update/{id}", controllers.UpdateBusiness).Methods("GET")
+	router.HandleFunc("/business/update/{id}", controllers.ProcessUpdateBusiness).Methods("POST")
 
 	// Category Handlers
 	router.HandleFunc("/category/create", controllers.CreateCategoryPage).Methods("GET")

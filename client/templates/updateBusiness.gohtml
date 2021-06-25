@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {{template "header" .}}
+    </head>
+    <body>
+        <div class="container">
+            {{template "nav" .}}
+
+            <h1>Update Business - {{ .Business.Name }}</h1>
+
+            <hr/>
+
+            <form method="post">
+                <div class="form-group mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input class="form-control" type="text" name="name" value="{{ .Business.Name }}" placeholder="Business name">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="description" class="form-label">Description</label>
+                    <input class="form-control" type="text" name="description" value="{{ .Business.Description }}" placeholder="Brief company description">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="address" class="form-label">Business / Pickup Address</label>
+                    <input class="form-control" type="text" name="address" value="{{ .Business.Address }}" placeholder="Building, Street, etc">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="unitno" class="form-label">Unit No</label>
+                    <input class="form-control" type="text" name="unitno" value="{{ .Business.UnitNo }}" placeholder="Unit No">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="zipcode" class="form-label">Postal Code</label>
+                    <input class="form-control" type="text" name="zipcode" value="{{ .Business.Zipcode }}" placeholder="Postal Code">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="website" class="form-label">Website</label>
+                    <input class="form-control" type="text" name="website" value="{{ .Business.Website }}" placeholder="Website URL">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="instagram" class="form-label">Instagram</label>
+                    <input class="form-control" type="text" name="instagram" value="{{ .Business.Instagram }}" placeholder="Instagram URL">
+                </div>
+                <div class="form-group mb-3">
+                    <label for="facebook" class="form-label">Facebook</label>
+                    <input class="form-control" type="text" name="facebook" value="{{ .Business.Facebook }}" placeholder="Facebook URL">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-purple mb-3">Submit</button>
+            </form>
+
+            {{template "footer"}}
+        </div>
+    </body>
+</html>
