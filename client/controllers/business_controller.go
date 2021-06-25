@@ -1,7 +1,11 @@
 package controllers
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"text/template"
 
@@ -68,8 +72,11 @@ func UpdateBusinessPage(res http.ResponseWriter, req *http.Request) {
 
 	tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
 }
+*/
 
 func ProcessBusinessPageForm(res http.ResponseWriter, req *http.Request) {
+
+	fmt.Println("POSTTTT BUSINESS PAGE")
 
 	businessName := req.FormValue("name")
 	description := req.FormValue("description")
@@ -80,22 +87,43 @@ func ProcessBusinessPageForm(res http.ResponseWriter, req *http.Request) {
 	instagram := req.FormValue("instagram")
 	facebook := req.FormValue("facebook")
 
-	var newBusiness *models.Business
+	data, err := json.Marshal(map[string]string{
+		"name":        businessName,
+		"description": description,
+		"address":     address,
+		"zipcode":     zipcode,
+		"unitno":      unitno,
+		"website":     website,
+		"instagram":   instagram,
+		"facebook":    facebook,
+	})
+	if err != nil {
+		log.Fatalf("login error %v\n", err)
+	}
 
-	newBusiness.Name = businessName
-	newBusiness.Description = description
-	newBusiness.Address = address
-	newBusiness.Zipcode = zipcode
-	newBusiness.UnitNo = unitno
-	newBusiness.Website = website
-	newBusiness.Instagram = instagram
-	newBusiness.Facebook = facebook
+	respBody := bytes.NewBuffer(data)
 
-	newBusiness.Geocode()
+	// Todo: add cookie check and send JWT with request
+	client := &http.Client{}
+	request, _ := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/businesses", respBody)
+	request.Header.Set("Content-Type", "application/json")
 
-	server.DB.Create(&newBusiness)
+	response, err := client.Do(request)
 
-	// Redirect to Index Page
-	http.Redirect(res, req, "/", http.StatusOK)
+	if err != nil {
+		fmt.Printf("The HTTP request failed with error %s\n", err)
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+		fmt.Println(response.StatusCode)
+
+		// Success
+		if response.StatusCode == 201 {
+			fmt.Println("Business created successfully")
+			fmt.Println(string(data))
+			http.Redirect(res, req, "/", http.StatusOK)
+		} else {
+			// handle error
+			fmt.Println("Business creation failed")
+		}
+	}
 }
-*/

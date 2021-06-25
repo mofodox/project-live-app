@@ -9,7 +9,6 @@ import (
 )
 
 func HandleRoutes(addr string) {
-	staticDir := "/public"
 
 	router := mux.NewRouter().StrictSlash(true)
 
@@ -19,14 +18,15 @@ func HandleRoutes(addr string) {
 
 	// Business Handlers
 	router.HandleFunc("/business/create", controllers.CreateBusinessPage).Methods("GET")
+	router.HandleFunc("/business/create", controllers.ProcessBusinessPageForm).Methods("POST")
 
 	/*
-		router.HandleFunc("/business/create", controllers.CreateBusinessPage).Methods("GET")
 		router.HandleFunc("/business/create", controllers.ProcessBusinessPageForm).Methods("POST")
 		router.HandleFunc("/business/update/{id}", controllers.UpdateBusinessPage).Methods("GET")
 	*/
 
-	router.PathPrefix(staticDir).Handler(http.StripPrefix(staticDir, http.FileServer(http.Dir("."+staticDir))))
+	fs := http.FileServer(http.Dir("./public"))
+	router.PathPrefix("/css/").Handler(fs)
 
 	log.Printf("Starting server on port %s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, router))
