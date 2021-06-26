@@ -17,6 +17,8 @@ func HandleRoutes(addr string) {
 	router.HandleFunc("/login", controllers.Login).Methods("POST", "GET")
 
 	// Business Handlers
+	router.HandleFunc("/business", controllers.ListBusiness).Methods("GET")
+
 	router.HandleFunc("/business/{id:[0-9]+}", controllers.ViewBusiness).Methods("GET")
 	router.HandleFunc("/business/create", controllers.CreateBusiness).Methods("GET")
 	router.HandleFunc("/business/create", controllers.ProcessCreateBusiness).Methods("POST")

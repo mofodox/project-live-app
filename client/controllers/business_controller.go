@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"text/template"
 
 	"github.com/gorilla/mux"
@@ -30,9 +31,81 @@ func init() {
 	tpl = template.Must(template.New("").ParseGlob("templates/*"))
 }
 
+func ListBusiness(res http.ResponseWriter, req *http.Request) {
+	name := req.FormValue("name")
+	status := strings.ToLower(req.FormValue("status"))
+	page := req.FormValue("page")
+
+	// pagination
+	pageNo, err := strconv.Atoi(page)
+
+	if err != nil || pageNo <= 0 {
+		pageNo = 1
+	}
+
+	querystring := "?pageNo=" + page
+
+	// status
+	if status != "" && status != "active" {
+		querystring += "&status=inactive"
+	}
+
+	// business name
+	if name != "" {
+		querystring += "&name=" + name
+	}
+
+	client := &http.Client{}
+	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses"+querystring, nil)
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := client.Do(request)
+
+	// handle error
+	if err != nil {
+		fmt.Println("Fetch businesses at list business failed")
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+		return
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+
+		// success
+		if response.StatusCode == 200 {
+			var businesses = []*models.Business{}
+			marshalErr := json.Unmarshal(data, &businesses)
+
+			if marshalErr != nil {
+				fmt.Println("Error decoding json at list businesses")
+				http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+				return
+			}
+
+			// anonymous payload
+			payload := struct {
+				PageTitle  string
+				Businesses []*models.Business
+				User       *models.User
+				ErrorMsg   string
+				SuccessMsg string
+			}{
+				"Businesses", businesses, nil, "", "",
+			}
+
+			fmt.Println(payload)
+			tpl.ExecuteTemplate(res, "businessListing.gohtml", payload)
+			return
+		} else {
+			// handle error
+			fmt.Println("Business listing failed")
+			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+			return
+		}
+	}
+}
+
 func CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
-	// Anonymous payload
+	// anonymous payload
 	payload := struct {
 		PageTitle  string
 		User       *models.User
@@ -48,6 +121,7 @@ func CreateBusiness(res http.ResponseWriter, req *http.Request) {
 func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	businessName := req.FormValue("name")
+	shortDescription := req.FormValue("shortDescription")
 	description := req.FormValue("description")
 	address := req.FormValue("address")
 	zipcode := req.FormValue("zipcode")
@@ -57,14 +131,15 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 	facebook := req.FormValue("facebook")
 
 	data, err := json.Marshal(map[string]string{
-		"name":        businessName,
-		"description": description,
-		"address":     address,
-		"zipcode":     zipcode,
-		"unitno":      unitno,
-		"website":     website,
-		"instagram":   instagram,
-		"facebook":    facebook,
+		"name":             businessName,
+		"shortDescription": shortDescription,
+		"description":      description,
+		"address":          address,
+		"zipcode":          zipcode,
+		"unitno":           unitno,
+		"website":          website,
+		"instagram":        instagram,
+		"facebook":         facebook,
 	})
 	if err != nil {
 		log.Fatalf("login error %v\n", err)
@@ -87,7 +162,7 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
 
-		// Success
+		// success
 		if response.StatusCode == 201 {
 			var business *models.Business
 			marshalErr := json.Unmarshal(data, &business)
@@ -122,9 +197,7 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var business *models.Business
-
-	// Anonymous payload
+	// anonymous payload
 	payload := struct {
 		PageTitle  string
 		Business   *models.Business
@@ -151,6 +224,7 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 
 		// success
 		if response.StatusCode == 200 {
+			var business *models.Business
 			marshalErr := json.Unmarshal(data, &business)
 
 			if marshalErr != nil {
@@ -184,6 +258,7 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	}
 
 	businessName := req.FormValue("name")
+	shortDescription := req.FormValue("shortDescription")
 	description := req.FormValue("description")
 	address := req.FormValue("address")
 	zipcode := req.FormValue("zipcode")
@@ -193,14 +268,15 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	facebook := req.FormValue("facebook")
 
 	data, err := json.Marshal(map[string]string{
-		"name":        businessName,
-		"description": description,
-		"address":     address,
-		"zipcode":     zipcode,
-		"unitno":      unitno,
-		"website":     website,
-		"instagram":   instagram,
-		"facebook":    facebook,
+		"name":             businessName,
+		"shortDescription": shortDescription,
+		"description":      description,
+		"address":          address,
+		"zipcode":          zipcode,
+		"unitno":           unitno,
+		"website":          website,
+		"instagram":        instagram,
+		"facebook":         facebook,
 	})
 	if err != nil {
 		log.Fatalf("login error %v\n", err)
@@ -247,9 +323,7 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var business *models.Business
-
-	// Anonymous payload
+	// anonymous payload
 	payload := struct {
 		PageTitle   string
 		Business    *models.Business
@@ -277,6 +351,7 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 
 		// success
 		if response.StatusCode == 200 {
+			var business *models.Business
 			marshalErr := json.Unmarshal(data, &business)
 
 			if marshalErr != nil {

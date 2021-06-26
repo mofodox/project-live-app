@@ -163,6 +163,8 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 
 			business.UserID = userId
 			business.Name = updatedBusiness.Name
+			business.Description = updatedBusiness.Description
+			business.ShortDescription = updatedBusiness.ShortDescription
 			business.Address = updatedBusiness.Address
 			business.UnitNo = updatedBusiness.UnitNo
 			business.Zipcode = updatedBusiness.Zipcode

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {{template "header" .}}
+    </head>
+    <body>
+        <div class="container">
+            {{template "nav" .}}
+
+            <hr/>
+
+            {{ if gt (len .Businesses) 0 }}
+                {{ range $key, $val := .Businesses }}
+                    <a href="/business/{{ $val.ID }}">
+                        <div class="mb-3">
+                            <div>{{ $val.Name }}</div>
+                            <div>{{ $val.ShortDescription }}</div>
+                        </div>
+                    </a>
+                {{ end }}
+            {{ end }}
+
+            {{template "footer"}}
+        </div>
+    </body>
+</html>
