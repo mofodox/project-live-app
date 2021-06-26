@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -17,11 +16,7 @@ import (
 
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
-	fmt.Println("CREATING BUSINESS")
-
 	if req.Header.Get("Content-type") == "application/json" {
-
-		fmt.Println("CREATING BUSINESS WITH CORRECT CONTENT TYPE")
 
 		var userId uint32 = 1
 
@@ -40,6 +35,16 @@ func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request)
 		if err == nil {
 			// convert JSON to object
 			json.Unmarshal(reqBody, &newBusiness)
+
+			// todo: sanitization
+
+			// validation
+			err := newBusiness.Validate()
+
+			if err != nil {
+				responses.ERROR(res, http.StatusInternalServerError, err)
+				return
+			}
 
 			newBusiness.UserID = userId
 
@@ -146,9 +151,14 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 			// convert JSON to object
 			json.Unmarshal(reqBody, &updatedBusiness)
 
-			addressChanged := false
-			if business.Address != updatedBusiness.Address || business.UnitNo != updatedBusiness.UnitNo || business.Zipcode != updatedBusiness.Zipcode {
-				addressChanged = true
+			// todo: sanitization
+
+			// validation
+			err := updatedBusiness.Validate()
+
+			if err != nil {
+				responses.ERROR(res, http.StatusInternalServerError, err)
+				return
 			}
 
 			business.UserID = userId
@@ -164,11 +174,7 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 			business.Instagram = updatedBusiness.Instagram
 			business.Facebook = updatedBusiness.Facebook
 
-			// get lat / lng automatically
-			if addressChanged && business.Lat == 0 && business.Lng == 0 {
-				// todo: change to go routine
-				business.Geocode()
-			}
+			business.Geocode()
 
 			result := server.DB.Save(&business)
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"strings"
 	"time"
 
 	"googlemaps.github.io/maps"
@@ -25,6 +26,18 @@ type Business struct {
 	Facebook    string    `gorm:"size:255;" json:"facebook"`
 	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+}
+
+func (business *Business) Validate() error {
+	if len(strings.TrimSpace(business.Name)) < 5 {
+		return errors.New("enter a business name that has at least 5 characters")
+	}
+
+	if len(strings.TrimSpace(business.Description)) < 20 {
+		return errors.New("enter a business description that has at least 20 characters")
+	}
+
+	return nil
 }
 
 // https://pkg.go.dev/googlemaps.github.io/maps?utm_source=godoc

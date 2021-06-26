@@ -17,6 +17,7 @@ import (
 )
 
 var tpl *template.Template
+var apiBaseURL string
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -25,6 +26,7 @@ func init() {
 		log.Println("Successfully loaded the env values")
 	}
 
+	apiBaseURL = os.Getenv("APIServerHostname") + ":" + os.Getenv("APIServerPort") + os.Getenv("APIServerBasePath")
 	tpl = template.Must(template.New("").ParseGlob("templates/*"))
 }
 
@@ -72,36 +74,44 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/businesses", respBody)
+	request, _ := http.NewRequest(http.MethodPost, apiBaseURL+"/businesses", respBody)
 	request.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(request)
 
+	// handle error
 	if err != nil {
-		// handle error
 		fmt.Println("Business creation failed")
 		http.Redirect(res, req, "/", response.StatusCode)
-		fmt.Printf("The HTTP request failed with error %s\n", err)
+		return
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println(response.StatusCode)
 
 		// Success
 		if response.StatusCode == 201 {
+			var business *models.Business
+			marshalErr := json.Unmarshal(data, &business)
+
+			if marshalErr != nil {
+				fmt.Println("Error decoding json at process create business")
+				http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+				return
+			}
+
 			fmt.Println("Business created successfully")
 			fmt.Println(string(data))
-			http.Redirect(res, req, "/", http.StatusOK)
+			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(business.ID), 10), http.StatusSeeOther)
+			return
 		} else {
 			// handle error
 			fmt.Println("Business creation failed")
-			http.Redirect(res, req, "/", response.StatusCode)
+			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+			return
 		}
 	}
 }
 
 func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
-
-	fmt.Println("UPDATE BUSINESS FORM")
 
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["id"])
@@ -126,36 +136,43 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/api/v1/businesses/"+vars["id"], nil)
+	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(request)
 
+	// handle error
 	if err != nil {
-		// handle error
-		fmt.Println("Business update failed")
-		http.Redirect(res, req, "/", response.StatusCode)
-		fmt.Printf("The HTTP request failed with error %s\n", err)
-	} else {
-		fmt.Println(response.StatusCode)
-
-		data, _ := ioutil.ReadAll(response.Body)
-		marshalErr := json.Unmarshal(data, &business)
-
-		if marshalErr != nil {
-			fmt.Println("Error decoding json")
-		}
-
-		payload.Business = business
-
-		tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
+		fmt.Println("Fetch business at update business form failed")
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
 		return
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+
+		// success
+		if response.StatusCode == 200 {
+			marshalErr := json.Unmarshal(data, &business)
+
+			if marshalErr != nil {
+				fmt.Println("Error decoding json at update business")
+				http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+				return
+			}
+
+			payload.Business = business
+
+			tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
+			return
+		} else {
+			// handle error
+			fmt.Println(string(data))
+			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+			return
+		}
 	}
 }
 
 func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
-
-	fmt.Println("PROCESS UPDATE BUSINESS")
 
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["id"])
@@ -193,36 +210,33 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/businesses/"+vars["id"], respBody)
+	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/businesses/"+vars["id"], respBody)
 	request.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(request)
 
+	// handle error
 	if err != nil {
-		// handle error
-		fmt.Println("Business creation failed")
-		http.Redirect(res, req, "/", response.StatusCode)
-		fmt.Printf("The HTTP request failed with error %s\n", err)
+		fmt.Println("Fetch business at process update business failed")
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+		return
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
-		fmt.Println(response.StatusCode)
 
-		// Success
+		// success
 		if response.StatusCode == 200 {
-			fmt.Println("Business updated successfully")
-			fmt.Println(string(data))
-			http.Redirect(res, req, "/", http.StatusOK)
+			http.Redirect(res, req, "/business/"+vars["id"], http.StatusSeeOther)
+			return
 		} else {
 			// handle error
-			fmt.Println("Business update failed")
-			http.Redirect(res, req, "/", response.StatusCode)
+			fmt.Println(string(data))
+			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+			return
 		}
 	}
 }
 
 func ViewBusiness(res http.ResponseWriter, req *http.Request) {
-
-	fmt.Println("UPDATE BUSINESS FORM")
 
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["id"])
@@ -248,30 +262,39 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 
 	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/api/v1/businesses/"+vars["id"], nil)
+	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(request)
 
+	// handle error
 	if err != nil {
-		// handle error
-		fmt.Println("Business update failed")
-		http.Redirect(res, req, "/", response.StatusCode)
-		fmt.Printf("The HTTP request failed with error %s\n", err)
-	} else {
-		fmt.Println(response.StatusCode)
-
-		data, _ := ioutil.ReadAll(response.Body)
-		marshalErr := json.Unmarshal(data, &business)
-
-		if marshalErr != nil {
-			fmt.Println("Error decoding json")
-		}
-
-		payload.PageTitle = business.Name
-		payload.Business = business
-
-		tpl.ExecuteTemplate(res, "viewBusiness.gohtml", payload)
+		fmt.Println("Fetch business at view business failed")
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
 		return
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+
+		// success
+		if response.StatusCode == 200 {
+			marshalErr := json.Unmarshal(data, &business)
+
+			if marshalErr != nil {
+				fmt.Println("Error decoding json at view business")
+				http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+				return
+			}
+
+			payload.PageTitle = business.Name
+			payload.Business = business
+
+			tpl.ExecuteTemplate(res, "viewBusiness.gohtml", payload)
+			return
+		} else {
+			// handle error
+			fmt.Println(string(data))
+			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+			return
+		}
 	}
 }
