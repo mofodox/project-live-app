@@ -101,8 +101,6 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 
-	fmt.Println("UPDATE BUSINESS FORM")
-
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["id"])
 
@@ -154,8 +152,6 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 }
 
 func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
-
-	fmt.Println("PROCESS UPDATE BUSINESS")
 
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["id"])
@@ -221,8 +217,6 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 }
 
 func ViewBusiness(res http.ResponseWriter, req *http.Request) {
-
-	fmt.Println("UPDATE BUSINESS FORM")
 
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["id"])
