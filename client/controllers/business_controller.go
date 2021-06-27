@@ -28,7 +28,14 @@ func init() {
 	}
 
 	apiBaseURL = os.Getenv("APIServerHostname") + ":" + os.Getenv("APIServerPort") + os.Getenv("APIServerBasePath")
-	tpl = template.Must(template.New("").ParseGlob("templates/*"))
+
+	funcMap := template.FuncMap{
+		"add": func(a int, b int) int {
+			return a + b
+		},
+	}
+
+	tpl = template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/*"))
 }
 
 func ListBusiness(res http.ResponseWriter, req *http.Request) {
@@ -83,13 +90,20 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 			// anonymous payload
 			payload := struct {
 				PageTitle  string
+				StartNo    int
 				Businesses []*models.Business
 				User       *models.User
 				ErrorMsg   string
 				SuccessMsg string
 			}{
-				"Businesses", businesses, nil, "", "",
+				"Businesses", 1, businesses, nil, "", "",
 			}
+
+			if pageNo > 1 {
+				payload.StartNo = pageNo - 1*15
+			}
+
+			fmt.Println(payload.StartNo)
 
 			fmt.Println(payload)
 			tpl.ExecuteTemplate(res, "businessListing.gohtml", payload)
