@@ -26,6 +26,7 @@ func HandleRoutes(addr string) {
 	router.HandleFunc("/business/update/{id:[0-9]+}", controllers.ProcessUpdateBusiness).Methods("POST")
 
 	// Category Handlers
+	router.HandleFunc("/category", controllers.ListCategory).Methods("GET")
 	router.HandleFunc("/category/create", controllers.CreateCategoryPage).Methods("GET")
 	router.HandleFunc("/category/create", controllers.ProcessCategoryForm).Methods("POST")
 	router.HandleFunc("/category/update/{id}", controllers.UpdateCategory).Methods("GET")
