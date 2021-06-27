@@ -11,10 +11,11 @@
 
             {{ if gt (len .Businesses) 0 }}
                 {{ range $key, $val := .Businesses }}
-                    <a href="/business/{{ $val.ID }}">
+                    <a class="business-item" href="/business/{{ $val.ID }}">
                         <div class="mb-3">
-                            <div>{{ $val.Name }}</div>
-                            <div>{{ $val.ShortDescription }}</div>
+                            <div class="business-name">{{ add $key $.StartNo }}. {{ $val.Name }}</div>
+                            <div class="business-short-description">{{ $val.ShortDescription }}</div>
+                            <div class="business-pickup">Self-Pickup: {{ if $val.Address }}<i class="fas fa-check text-success"></i>{{ else }}<i class="fas fa-times text-danger"></i>{{ end }}</div>
                         </div>
                     </a>
                 {{ end }}
@@ -22,5 +23,18 @@
 
             {{template "footer"}}
         </div>
+
+        <style>
+            .business-item {
+                text-decoration: none;
+                color: #000;
+            }
+            .business-item:hover {
+                color: #444;
+            }
+            .business-name {
+                font-weight: bold;
+            }
+        </style>
     </body>
 </html>
