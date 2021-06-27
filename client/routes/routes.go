@@ -30,6 +30,7 @@ func HandleRoutes(addr string) {
 	router.HandleFunc("/category/create", controllers.ProcessCategoryForm).Methods("POST")
 	router.HandleFunc("/category/update/{id}", controllers.UpdateCategory).Methods("GET")
 	router.HandleFunc("/category/update/{id}", controllers.ProcessUpdateCategory).Methods("POST")
+	router.HandleFunc("/category/{id:[0-9]+}", controllers.ViewCategory).Methods("GET")
 
 	fs := http.FileServer(http.Dir("./public"))
 	router.PathPrefix("/css/").Handler(fs)
