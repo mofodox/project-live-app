@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {{template "header" .}}
+    </head>
+    <body>
+        <div class="container">
+            {{template "catnav" .}}
+
+            <hr/>
+
+            {{ if gt (len .Categories) 0 }}
+                {{ range $key, $val := .Categories }}
+                    <a class="category-item" href="/category/{{ $val.ID }}">
+                        <div class="mb-3">
+                            <div class="category-name">{{ $val.Name }}</div>
+                            <div class="category-description">{{ $val.Description }}</div>
+                        </div>
+                    </a>
+                {{ end }}
+            {{ end }}
+
+            {{template "footer"}}
+        </div>
+
+        <style>
+            .category-item {
+                text-decoration: none;
+                color: #000;
+            }
+            .category-item:hover {
+                color: #444;
+            }
+            .category-name {
+                font-weight: bold;
+            }
+        </style>
+    </body>
+</html>
