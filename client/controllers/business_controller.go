@@ -39,31 +39,39 @@ func init() {
 }
 
 func ListBusiness(res http.ResponseWriter, req *http.Request) {
-	name := req.FormValue("name")
-	status := strings.ToLower(req.FormValue("status"))
-	page := req.FormValue("page")
 
-	// pagination
-	pageNo, err := strconv.Atoi(page)
+	querystring := ""
+	pageNo := 1
 
-	if err != nil || pageNo <= 0 {
-		pageNo = 1
-	}
+	if req.Method == http.MethodGet {
+		name := req.FormValue("name")
+		status := strings.ToLower(req.FormValue("status"))
+		page := req.FormValue("page")
 
-	querystring := "?pageNo=" + page
+		// pagination
+		pageNo, err := strconv.Atoi(page)
 
-	// status
-	if status != "" && status != "active" {
-		querystring += "&status=inactive"
-	}
+		if err != nil || pageNo <= 0 {
+			pageNo = 1
+		}
 
-	// business name
-	if name != "" {
-		querystring += "&name=" + name
+		querystring = "?pageNo=" + page
+
+		// status
+		if status != "" && status != "active" {
+			querystring += "&status=inactive"
+		}
+
+		// business name
+		if name != "" {
+			querystring += "&name=" + name
+		}
 	}
 
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses"+querystring, nil)
+	url := apiBaseURL + "/businesses" + querystring
+	fmt.Println(url)
+	request, _ := http.NewRequest(http.MethodGet, url, nil)
 	request.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(request)
