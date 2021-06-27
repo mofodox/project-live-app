@@ -55,7 +55,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 			pageNo = 1
 		}
 
-		querystring = "?pageNo=" + page
+		querystring = "?pageNo=" + strconv.Itoa(pageNo)
 
 		// status
 		if status != "" && status != "active" {
@@ -70,7 +70,6 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 
 	client := &http.Client{}
 	url := apiBaseURL + "/businesses" + querystring
-	fmt.Println(url)
 	request, _ := http.NewRequest(http.MethodGet, url, nil)
 	request.Header.Set("Content-Type", "application/json")
 
@@ -107,13 +106,10 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 				"Businesses", 1, businesses, nil, "", "",
 			}
 
+			// page limit hardcoded to 15 at the moment on server side
 			if pageNo > 1 {
 				payload.StartNo = pageNo - 1*15
 			}
-
-			fmt.Println(payload.StartNo)
-
-			fmt.Println(payload)
 			tpl.ExecuteTemplate(res, "businessListing.gohtml", payload)
 			return
 		} else {
@@ -197,7 +193,7 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 			fmt.Println("Business created successfully")
 			fmt.Println(string(data))
-			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(business.ID), 10), http.StatusSeeOther)
+			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(business.ID), 10), http.StatusFound)
 			return
 		} else {
 			// handle error
@@ -323,7 +319,7 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 
 		// success
 		if response.StatusCode == 200 {
-			http.Redirect(res, req, "/business/"+vars["id"], http.StatusSeeOther)
+			http.Redirect(res, req, "/business/"+vars["id"], http.StatusFound)
 			return
 		} else {
 			// handle error
