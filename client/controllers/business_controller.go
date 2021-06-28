@@ -123,6 +123,14 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 		if pageNo > 1 {
 			payload.StartNo = pageNo - 1*15
 		}
+
+		// Get User
+		user, err := IsLoggedIn(req)
+
+		if err == nil {
+			payload.User = user
+		}
+
 		tpl.ExecuteTemplate(res, "businessListing.gohtml", payload)
 		return
 	} else {
