@@ -32,10 +32,10 @@ func CreateToken(res http.ResponseWriter, userId uint32) (string, error) {
 		log.Fatalf("token error %s\n", err)
 	}
 
-	cookie := &http.Cookie {
-		Name: "jwt-token",
-		Value: token,
-		Expires: time.Now().Add(time.Hour * 1),
+	cookie := &http.Cookie{
+		Name:     "jwt-token",
+		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 1),
 		HttpOnly: true,
 	}
 
@@ -50,7 +50,7 @@ func TokenValid(req *http.Request) error {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
-		
+
 		return []byte(os.Getenv("HBB_SECRET_KEY")), nil
 	})
 
@@ -88,7 +88,35 @@ func ExtractToken(req *http.Request) string {
 
 func ExtractTokenID(req *http.Request) (uint32, error) {
 	tokenString := ExtractToken(req)
-	token, err := jwt.Parse(tokenString, func (token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return []byte(os.Getenv("HBB_SECRET_KEY")), nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if ok && token.Valid {
+		uid, err := strconv.ParseUint(fmt.Sprintf("%.0f", claims["user_id"]), 10, 32)
+		if err != nil {
+			return 0, err
+		}
+
+		fmt.Println("jwt-token")
+		return uint32(uid), nil
+	}
+
+	return 0, nil
+}
+
+// todo: possible to make it return user?
+func GetTokenID(tokenString string) (uint32, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
