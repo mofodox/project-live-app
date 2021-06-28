@@ -52,6 +52,7 @@ func (server *Server) BusinessComments(res http.ResponseWriter, req *http.Reques
 		business_ID, err := strconv.Atoi(vars["id"])
 		if err != nil {
 			responses.ERROR(res, http.StatusInternalServerError, err)
+			return
 		}
 		// Might chance to linked list later
 		bComments := []models.Comment{}
