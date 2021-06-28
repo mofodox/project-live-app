@@ -145,6 +145,9 @@ func CreateBusiness(res http.ResponseWriter, req *http.Request) {
 		"Create Business", nil, nil, "", "",
 	}
 
+	userID, err := IsLoggedIn(req)
+	fmt.Println(userID, err)
+
 	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 }
 

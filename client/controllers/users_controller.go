@@ -10,8 +10,25 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 )
+
+func IsLoggedIn(req *http.Request) (uint32, bool) {
+	myCookie, err := req.Cookie("jwt-token")
+	if err != nil {
+		return 0, false
+	}
+
+	token := myCookie.Value
+
+	userId, err := auth.GetTokenID(token)
+	if err != nil {
+		return 0, false
+	}
+
+	return userId, true
+}
 
 func Register(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
@@ -62,7 +79,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 		PageTitle  string
 		ErrorMsg   string
 		SuccessMsg string
-		User models.User
+		User       models.User
 	}{
 		"User Register", "", "", user,
 	}
@@ -121,24 +138,11 @@ func Login(res http.ResponseWriter, req *http.Request) {
 			Expires: time.Now().Add(time.Hour * 1),
 		}
 
-		fmt.Println(cookie)
-
-		// Anonymous payload
-		payload := struct {
-			PageTitle  string
-			ErrorMsg   string
-			SuccessMsg string
-			Token string
-		}{
-			"User Login", "", "", tokenString,
-		}
-
-		tpl.ExecuteTemplate(res, "login.gohtml", payload)
-
-		fmt.Printf("token from payload %v\n", payload.Token)
+		// todo: handle wrong login info
 
 		http.SetCookie(res, cookie)
 		http.Redirect(res, req, "/", http.StatusFound)
+		return
 	} else {
 		// Anonymous payload
 		payload := struct {
