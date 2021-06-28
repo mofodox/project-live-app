@@ -14,75 +14,67 @@ import (
 )
 
 func Register(res http.ResponseWriter, req *http.Request) {
+	client := &http.Client{}
+	var user models.User
+
+	fullname := req.FormValue("fullname")
+	email := req.FormValue("email")
+	password := req.FormValue("password")
+
+	data, err := json.Marshal(map[string]string{
+		"fullname": fullname,
+		"email":    email,
+		"password": password,
+	})
+	if err != nil {
+		log.Fatalf("register error %v\n", err)
+	}
+
+	responseBuffer := bytes.NewBuffer(data)
+
+	req, err = http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users", responseBuffer)
+	if err != nil {
+		log.Fatalf("error response occurred %v\n", err)
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer resp.Body.Close()
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := json.Unmarshal(respBody, &user); err != nil {
+		log.Fatal(err)
+	}
+
+	log.Println("User registered")
+
 	// Anonymous payload
 	payload := struct {
 		PageTitle  string
 		ErrorMsg   string
 		SuccessMsg string
+		User models.User
 	}{
-		"User Register", "", "",
+		"User Register", "", "", user,
 	}
+
+	fmt.Printf("user from payload %v\n", payload.User)
 
 	tpl.ExecuteTemplate(res, "register.gohtml", payload)
 
-	if req.Method == http.MethodPost {
-		client := &http.Client{}
-
-		fullname := req.FormValue("fullname")
-		email := req.FormValue("email")
-		password := req.FormValue("password")
-
-		data, err := json.Marshal(map[string]string{
-			"fullname": fullname,
-			"email":    email,
-			"password": password,
-		})
-		if err != nil {
-			log.Fatalf("register error %v\n", err)
-		}
-
-		responseBuffer := bytes.NewBuffer(data)
-
-		req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users", responseBuffer)
-		if err != nil {
-			log.Fatalf("error response occurred %v\n", err)
-		}
-
-		req.Header.Set("Content-Type", "application/json")
-
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		defer resp.Body.Close()
-
-		respBody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		if err := json.Unmarshal(respBody, &models.User{}); err != nil {
-			log.Fatal(err)
-		}
-		log.Println("User registered")
-
-		http.Redirect(res, req, "/", http.StatusCreated)
-	}
+	http.Redirect(res, req, "/", http.StatusCreated)
 }
 
 func Login(res http.ResponseWriter, req *http.Request) {
-	// Anonymous payload
-	payload := struct {
-		PageTitle  string
-		ErrorMsg   string
-		SuccessMsg string
-	}{
-		"User Login", "", "",
-	}
-
-	tpl.ExecuteTemplate(res, "login.gohtml", payload)
-
 	if req.Method == http.MethodPost {
 		client := &http.Client{}
 
@@ -106,8 +98,6 @@ func Login(res http.ResponseWriter, req *http.Request) {
 		}
 
 		req.Header.Set("Content-Type", "application/json")
-		c := req.Cookies()
-		fmt.Printf("cookies: %s\n", c)
 
 		resp, err := client.Do(req)
 		if err != nil {
@@ -133,7 +123,44 @@ func Login(res http.ResponseWriter, req *http.Request) {
 
 		fmt.Println(cookie)
 
+		// Anonymous payload
+		payload := struct {
+			PageTitle  string
+			ErrorMsg   string
+			SuccessMsg string
+			Token string
+		}{
+			"User Login", "", "", tokenString,
+		}
+
+		tpl.ExecuteTemplate(res, "login.gohtml", payload)
+
+		fmt.Printf("token from payload %v\n", payload.Token)
+
 		http.SetCookie(res, cookie)
-		http.Redirect(res, req, "/", http.StatusOK)
+		http.Redirect(res, req, "/", http.StatusFound)
+	} else {
+		// Anonymous payload
+		payload := struct {
+			PageTitle  string
+			ErrorMsg   string
+			SuccessMsg string
+		}{
+			"User Login", "", "",
+		}
+
+		tpl.ExecuteTemplate(res, "login.gohtml", payload)
 	}
+}
+
+func Logout(res http.ResponseWriter, req *http.Request) {
+	cookie := &http.Cookie{
+		Name:    "jwt-token",
+		Value:   "tokenString",
+		Expires: time.Now().Add(-time.Hour * 1),
+	}
+
+	http.SetCookie(res, cookie)
+
+	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
