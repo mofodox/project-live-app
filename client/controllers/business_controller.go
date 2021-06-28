@@ -408,12 +408,20 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 	// anonymous payload
 	payload := struct {
 		PageTitle   string
+		User        *models.User
 		Business    *models.Business
 		ErrorMsg    string
 		SuccessMsg  string
 		GMapsAPIKey string
 	}{
-		"View Business", nil, "", "", os.Getenv("GMapsPublicAPI"),
+		"View Business", nil, nil, "", "", os.Getenv("GMapsPublicAPI"),
+	}
+
+	// Get User
+	user, err := IsLoggedIn(req)
+
+	if err == nil {
+		payload.User = user
 	}
 
 	// Todo: add cookie check and send JWT with request
