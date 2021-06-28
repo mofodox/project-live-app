@@ -3,15 +3,61 @@ package controllers
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 )
+
+func IsLoggedIn(req *http.Request) (*models.User, error) {
+	myCookie, err := req.Cookie("jwt-token")
+	if err != nil {
+		return nil, err
+	}
+
+	token := myCookie.Value
+
+	userID, err := auth.GetTokenID(token)
+	if err != nil {
+		return nil, err
+	}
+
+	// Todo: add cookie check and send JWT with request
+	client := &http.Client{}
+	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+strconv.FormatUint(uint64(userID), 10), nil)
+	request.Header.Set("Content-Type", "application/json")
+	response, err := client.Do(request)
+
+	// handle error
+	if err != nil {
+		fmt.Println("error sending get user info request", err)
+		return nil, err
+	}
+	defer response.Body.Close()
+
+	data, _ := ioutil.ReadAll(response.Body)
+
+	// success
+	if response.StatusCode == 200 {
+		var user *models.User
+		marshalErr := json.Unmarshal(data, &user)
+
+		if marshalErr != nil {
+			return nil, marshalErr
+		}
+
+		return user, nil
+	}
+
+	return nil, errors.New("unable to fetch user")
+}
 
 func Register(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
@@ -62,7 +108,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 		PageTitle  string
 		ErrorMsg   string
 		SuccessMsg string
-		User models.User
+		User       models.User
 	}{
 		"User Register", "", "", user,
 	}
@@ -121,32 +167,20 @@ func Login(res http.ResponseWriter, req *http.Request) {
 			Expires: time.Now().Add(time.Hour * 1),
 		}
 
-		fmt.Println(cookie)
-
-		// Anonymous payload
-		payload := struct {
-			PageTitle  string
-			ErrorMsg   string
-			SuccessMsg string
-			Token string
-		}{
-			"User Login", "", "", tokenString,
-		}
-
-		tpl.ExecuteTemplate(res, "login.gohtml", payload)
-
-		fmt.Printf("token from payload %v\n", payload.Token)
+		// todo: handle wrong login info
 
 		http.SetCookie(res, cookie)
 		http.Redirect(res, req, "/", http.StatusFound)
+		return
 	} else {
 		// Anonymous payload
 		payload := struct {
 			PageTitle  string
 			ErrorMsg   string
 			SuccessMsg string
+			User       *models.User
 		}{
-			"User Login", "", "",
+			"User Login", "", "", nil,
 		}
 
 		tpl.ExecuteTemplate(res, "login.gohtml", payload)
