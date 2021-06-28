@@ -11,6 +11,12 @@
 
             <hr/>
 
+            {{ if .ErrorMsg }}
+            <div class="alert alert-danger" role="alert">
+                {{ ucFirst .ErrorMsg }}
+            </div>
+            {{ end }}
+
             <form method="post">
                 <div class="form-group mb-3">
                     <label for="name" class="form-label">Name</label>

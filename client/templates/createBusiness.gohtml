@@ -11,42 +11,48 @@
 
             <hr/>
 
+            {{ if .ErrorMsg }}
+            <div class="alert alert-danger" role="alert">
+                {{ ucFirst .ErrorMsg }}
+            </div>
+            {{ end }}
+
             <form method="post">
                 <div class="form-group mb-3">
                     <label for="name" class="form-label">Name</label>
-                    <input class="form-control" type="text" name="name" placeholder="Business name">
+                    <input class="form-control" type="text" name="name" {{ if .Business }} value="{{ .Business.Name }}" {{ end }} placeholder="Business name">
                 </div>
                 <div class="form-group mb-3">
                     <label for="shortDescription" class="form-label">Short Description</label>
-                    <input class="form-control" type="text" name="shortDescription" placeholder="Short company description">
+                    <input class="form-control" type="text" name="shortDescription" {{ if .Business }} value="{{ .Business.ShortDescription }}" {{ end }} placeholder="Short company description">
                 </div>
                 <div class="form-group mb-3">
                     <label for="description" class="form-label">Description</label>
-                    <textarea class="form-control" name="description" placeholder="Detailed company description" id="description"></textarea>
+                    <textarea class="form-control" name="description" placeholder="Detailed company description" id="description">{{ if .Business }}{{ .Business.Description }}{{ end }}</textarea>
                 </div>
                 <div class="form-group mb-3">
                     <label for="address" class="form-label">Business / Pickup Address</label>
-                    <input class="form-control" type="text" name="address" placeholder="Building, Street, etc">
+                    <input class="form-control" type="text" name="address" {{ if .Business }} value="{{ .Business.Address }}" {{ end }} placeholder="Building, Street, etc">
                 </div>
                 <div class="form-group mb-3">
                     <label for="unitno" class="form-label">Unit No</label>
-                    <input class="form-control" type="text" name="unitno" placeholder="Unit No">
+                    <input class="form-control" type="text" name="unitno" {{ if .Business }} value="{{ .Business.UnitNo }}" {{ end }} placeholder="Unit No">
                 </div>
                 <div class="form-group mb-3">
                     <label for="zipcode" class="form-label">Postal Code</label>
-                    <input class="form-control" type="text" name="zipcode" placeholder="Postal Code">
+                    <input class="form-control" type="text" name="zipcode" {{ if .Business }} value="{{ .Business.Zipcode }}" {{ end }} placeholder="Postal Code">
                 </div>
                 <div class="form-group mb-3">
                     <label for="website" class="form-label">Website</label>
-                    <input class="form-control" type="text" name="website" placeholder="Website URL">
+                    <input class="form-control" type="text" name="website" {{ if .Business }} value="{{ .Business.Website }}" {{ end }} placeholder="Website URL">
                 </div>
                 <div class="form-group mb-3">
                     <label for="instagram" class="form-label">Instagram</label>
-                    <input class="form-control" type="text" name="instagram" placeholder="Instagram URL">
+                    <input class="form-control" type="text" name="instagram" {{ if .Business }} value="{{ .Business.Instagram }}" {{ end }} placeholder="Instagram URL">
                 </div>
                 <div class="form-group mb-3">
                     <label for="facebook" class="form-label">Facebook</label>
-                    <input class="form-control" type="text" name="facebook" placeholder="Facebook URL">
+                    <input class="form-control" type="text" name="facebook" {{ if .Business }} value="{{ .Business.Facebook }}" {{ end }} placeholder="Facebook URL">
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-purple mb-3">Submit</button>

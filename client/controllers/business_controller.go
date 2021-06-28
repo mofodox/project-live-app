@@ -11,10 +11,12 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"unicode"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/mofodox/project-live-app/api/models"
+	"github.com/mofodox/project-live-app/api/responses"
 )
 
 var tpl *template.Template
@@ -32,6 +34,15 @@ func init() {
 	funcMap := template.FuncMap{
 		"add": func(a int, b int) int {
 			return a + b
+		},
+
+		"ucFirst": func(str string) string {
+			if len(str) == 0 {
+				return ""
+			}
+			tmp := []rune(str)
+			tmp[0] = unicode.ToUpper(tmp[0])
+			return string(tmp)
 		},
 	}
 
@@ -127,10 +138,11 @@ func CreateBusiness(res http.ResponseWriter, req *http.Request) {
 	payload := struct {
 		PageTitle  string
 		User       *models.User
+		Business   *models.Business
 		ErrorMsg   string
 		SuccessMsg string
 	}{
-		"Create Business", nil, "", "",
+		"Create Business", nil, nil, "", "",
 	}
 
 	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
@@ -138,70 +150,78 @@ func CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 
-	businessName := req.FormValue("name")
-	shortDescription := req.FormValue("shortDescription")
-	description := req.FormValue("description")
-	address := req.FormValue("address")
-	zipcode := req.FormValue("zipcode")
-	unitno := req.FormValue("unitno")
-	website := req.FormValue("website")
-	instagram := req.FormValue("instagram")
-	facebook := req.FormValue("facebook")
-
-	data, err := json.Marshal(map[string]string{
-		"name":             businessName,
-		"shortDescription": shortDescription,
-		"description":      description,
-		"address":          address,
-		"zipcode":          zipcode,
-		"unitno":           unitno,
-		"website":          website,
-		"instagram":        instagram,
-		"facebook":         facebook,
-	})
-	if err != nil {
-		log.Fatalf("login error %v\n", err)
+	// anonymous payload
+	payload := struct {
+		PageTitle  string
+		User       *models.User
+		Business   *models.Business
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"Create Business", nil, nil, "", "",
 	}
 
-	respBody := bytes.NewBuffer(data)
+	var business models.Business
+
+	business.Name = req.FormValue("name")
+	business.ShortDescription = req.FormValue("shortDescription")
+	business.Description = req.FormValue("description")
+	business.Address = req.FormValue("address")
+	business.Zipcode = req.FormValue("zipcode")
+	business.UnitNo = req.FormValue("unitno")
+	business.Website = req.FormValue("website")
+	business.Instagram = req.FormValue("instagram")
+	business.Facebook = req.FormValue("facebook")
+
+	payload.Business = &business
+
+	data, err := json.Marshal(business)
+	if err != nil {
+		fmt.Println("error marshalling at process create business", err)
+		payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
+		tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
+		return
+	}
 
 	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodPost, apiBaseURL+"/businesses", respBody)
+	request, _ := http.NewRequest(http.MethodPost, apiBaseURL+"/businesses", bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
-
 	response, err := client.Do(request)
 
 	// handle error
 	if err != nil {
-		fmt.Println("Business creation failed")
-		http.Redirect(res, req, "/", response.StatusCode)
+		fmt.Println("error sending process create business request")
+		payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
+		tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 		return
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
 
 		// success
 		if response.StatusCode == 201 {
-			var business *models.Business
 			marshalErr := json.Unmarshal(data, &business)
 
 			if marshalErr != nil {
-				fmt.Println("Error decoding json at process create business")
-				http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+				fmt.Println("error unmarshaling at process create business", marshalErr)
+				payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
+				tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 				return
 			}
 
 			fmt.Println("Business created successfully")
-			fmt.Println(string(data))
 			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(business.ID), 10), http.StatusFound)
 			return
 		} else {
 			// handle error
 			fmt.Println("Business creation failed")
-			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
-			return
+			var errorResponse responses.ErrorResponse
+			json.Unmarshal(data, &errorResponse)
+			payload.ErrorMsg = errorResponse.Error
 		}
 	}
+
+	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 }
 
 func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
@@ -229,12 +249,11 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
-
 	response, err := client.Do(request)
 
 	// handle error
 	if err != nil {
-		fmt.Println("Fetch business at update business form failed")
+		fmt.Println("error sending get business request", err)
 		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
 		return
 	} else {
@@ -246,7 +265,7 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 			marshalErr := json.Unmarshal(data, &business)
 
 			if marshalErr != nil {
-				fmt.Println("Error decoding json at update business")
+				fmt.Println("error unmarshaling at update business", marshalErr)
 				http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
 				return
 			}
@@ -267,53 +286,54 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
-	_, err := strconv.Atoi(vars["id"])
+	businessID, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
-		// Redirect to Index Page
+		// Redirect to index
 		http.Redirect(res, req, "/", http.StatusNotFound)
 		return
 	}
 
-	businessName := req.FormValue("name")
-	shortDescription := req.FormValue("shortDescription")
-	description := req.FormValue("description")
-	address := req.FormValue("address")
-	zipcode := req.FormValue("zipcode")
-	unitno := req.FormValue("unitno")
-	website := req.FormValue("website")
-	instagram := req.FormValue("instagram")
-	facebook := req.FormValue("facebook")
+	var business models.Business
 
-	data, err := json.Marshal(map[string]string{
-		"name":             businessName,
-		"shortDescription": shortDescription,
-		"description":      description,
-		"address":          address,
-		"zipcode":          zipcode,
-		"unitno":           unitno,
-		"website":          website,
-		"instagram":        instagram,
-		"facebook":         facebook,
-	})
-	if err != nil {
-		log.Fatalf("login error %v\n", err)
+	business.ID = uint32(businessID)
+	business.Name = req.FormValue("name")
+	business.ShortDescription = req.FormValue("shortDescription")
+	business.Description = req.FormValue("description")
+	business.Address = req.FormValue("address")
+	business.Zipcode = req.FormValue("zipcode")
+	business.UnitNo = req.FormValue("unitno")
+	business.Website = req.FormValue("website")
+	business.Instagram = req.FormValue("instagram")
+	business.Facebook = req.FormValue("facebook")
+
+	payload := struct {
+		PageTitle  string
+		Business   models.Business
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"Update Business", business, "", "",
 	}
 
-	respBody := bytes.NewBuffer(data)
+	data, err := json.Marshal(business)
+	if err != nil {
+		fmt.Println("error marshalling at process update business", err)
+		payload.ErrorMsg = "An unexpected error has occured while updating business. Please try again."
+		tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
+		return
+	}
 
 	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/businesses/"+vars["id"], respBody)
+	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/businesses/"+vars["id"], bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
-
 	response, err := client.Do(request)
 
 	// handle error
 	if err != nil {
-		fmt.Println("Fetch business at process update business failed")
-		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
-		return
+		fmt.Println("error sending process update business request", err)
+		payload.ErrorMsg = "An unexpected error has occured while updating business. Please try again."
 	} else {
 		data, _ := ioutil.ReadAll(response.Body)
 
@@ -322,12 +342,14 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 			http.Redirect(res, req, "/business/"+vars["id"], http.StatusFound)
 			return
 		} else {
-			// handle error
-			fmt.Println(string(data))
-			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
-			return
+			// get error
+			var errorResponse responses.ErrorResponse
+			json.Unmarshal(data, &errorResponse)
+			payload.ErrorMsg = errorResponse.Error
 		}
 	}
+
+	tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
 }
 
 func ViewBusiness(res http.ResponseWriter, req *http.Request) {
@@ -356,12 +378,11 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
-
 	response, err := client.Do(request)
 
 	// handle error
 	if err != nil {
-		fmt.Println("Fetch business at view business failed")
+		fmt.Println("error sending view business request", err)
 		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
 		return
 	} else {
@@ -373,7 +394,7 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 			marshalErr := json.Unmarshal(data, &business)
 
 			if marshalErr != nil {
-				fmt.Println("Error decoding json at view business")
+				fmt.Println("error unmasharling at view business", marshalErr)
 				http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
 				return
 			}
