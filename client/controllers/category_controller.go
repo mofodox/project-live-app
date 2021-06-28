@@ -13,6 +13,139 @@ import (
 	"github.com/mofodox/project-live-app/api/models"
 )
 
+func ListCategory(res http.ResponseWriter, req *http.Request) {
+	name := req.FormValue("name")
+	page := req.FormValue("page")
+
+	// pagination
+	pageNo, err := strconv.Atoi(page)
+
+	if err != nil || pageNo <= 0 {
+		pageNo = 1
+	}
+
+	querystring := "?pageNo=" + page
+
+	if name != "" {
+		querystring += "&name=" + name
+	}
+
+	client := &http.Client{}
+	request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/api/v1/categories/", nil)
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := client.Do(request)
+
+	// handle error
+	if err != nil {
+		fmt.Println("Fetch categories at list category failed")
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+		return
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+
+		// success
+		if response.StatusCode == 200 {
+			var categories = []*models.Category{}
+			marshalErr := json.Unmarshal(data, &categories)
+
+			if marshalErr != nil {
+				fmt.Println("Error decoding json at list categories")
+				http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+				return
+			}
+
+			// anonymous payload
+			payload := struct {
+				PageTitle  string
+				StartNo    int
+				Categories []*models.Category
+				User       *models.User
+				ErrorMsg   string
+				SuccessMsg string
+			}{
+				"Categories", 1, categories, nil, "", "",
+			}
+
+			if pageNo > 1 {
+				payload.StartNo = pageNo - 1*15
+			}
+
+			fmt.Println(payload.StartNo)
+
+			fmt.Println(payload)
+			tpl.ExecuteTemplate(res, "categoryListing.gohtml", payload)
+			return
+		} else {
+			// handle error
+			fmt.Println("Category listing failed")
+			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+			return
+		}
+	}
+}
+
+func ViewCategory(res http.ResponseWriter, req *http.Request) {
+
+	vars := mux.Vars(req)
+	_, err := strconv.Atoi(vars["id"])
+
+	if err != nil {
+		// Redirect to Index Page
+		http.Redirect(res, req, "/", http.StatusNotFound)
+		return
+	}
+
+	// anonymous payload
+	payload := struct {
+		PageTitle  string
+		Category   *models.Category
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"View Category", nil, "", "",
+	}
+
+	// Todo: add cookie check and send JWT with request
+	client := &http.Client{}
+	request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/api/v1/categories/"+vars["id"], nil)
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := client.Do(request)
+
+	// handle error
+	if err != nil {
+		fmt.Println("Fetch category at view category failed")
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+		return
+	} else {
+		data, _ := ioutil.ReadAll(response.Body)
+
+		// success
+		if response.StatusCode == 200 {
+			var category *models.Category
+			marshalErr := json.Unmarshal(data, &category)
+
+			if marshalErr != nil {
+				fmt.Println("Error decoding json at view category")
+				http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+				return
+			}
+
+			payload.PageTitle = category.Name
+			payload.Category = category
+
+			tpl.ExecuteTemplate(res, "viewCategory.gohtml", payload)
+			return
+		} else {
+			// handle error
+			fmt.Println(string(data))
+			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+			return
+		}
+	}
+}
+
 func CreateCategoryPage(res http.ResponseWriter, req *http.Request) {
 
 	fmt.Println("CREATE Category Page")

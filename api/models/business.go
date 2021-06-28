@@ -11,26 +11,31 @@ import (
 )
 
 type Business struct {
-	ID          uint32    `gorm:"PRIMARY_KEY;auto_increment" json:"id"`
-	UserID      uint32    `gorm:"type:int(10);not null" json:"userId"` // last user that edited. We're only keeping last edit.
-	Name        string    `gorm:"size:255;UNIQUE;not null" json:"name"`
-	Description string    `gorm:"type:text;not null" json:"description"` // 65,535 characters, rich text editor
-	Address     string    `gorm:"size:255;not null" json:"address"`
-	UnitNo      string    `gorm:"size:255;not null" json:"unitNo"`
-	Zipcode     string    `gorm:"size:255;not null" json:"zipcode"`
-	Lat         float64   `gorm:"default:0" json:"lat"`
-	Lng         float64   `gorm:"default:0" json:"lng"`
-	Status      string    `gorm:"default:'active'" json:"status"` // active / inactive (deleted)
-	Website     string    `gorm:"size:255;" json:"website"`
-	Instagram   string    `gorm:"size:255;" json:"instagram"`
-	Facebook    string    `gorm:"size:255;" json:"facebook"`
-	CreatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
-	UpdatedAt   time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	ID               uint32    `gorm:"PRIMARY_KEY;auto_increment" json:"id"`
+	UserID           uint32    `gorm:"type:int(10);not null" json:"userId"` // last user that edited. We're only keeping last edit.
+	Name             string    `gorm:"size:255;UNIQUE;not null" json:"name"`
+	ShortDescription string    `gorm:"size:255;not null" json:"shortDescription"`
+	Description      string    `gorm:"type:text;not null" json:"description"` // 65,535 characters, rich text editor
+	Address          string    `gorm:"size:255;not null" json:"address"`
+	UnitNo           string    `gorm:"size:255;not null" json:"unitNo"`
+	Zipcode          string    `gorm:"size:255;not null" json:"zipcode"`
+	Lat              float64   `gorm:"default:0" json:"lat"`
+	Lng              float64   `gorm:"default:0" json:"lng"`
+	Status           string    `gorm:"default:'active'" json:"status"` // active / inactive (deleted)
+	Website          string    `gorm:"size:255;" json:"website"`
+	Instagram        string    `gorm:"size:255;" json:"instagram"`
+	Facebook         string    `gorm:"size:255;" json:"facebook"`
+	CreatedAt        time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
+	UpdatedAt        time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
 }
 
 func (business *Business) Validate() error {
 	if len(strings.TrimSpace(business.Name)) < 5 {
 		return errors.New("enter a business name that has at least 5 characters")
+	}
+
+	if len(strings.TrimSpace(business.ShortDescription)) < 20 {
+		return errors.New("enter a short business description that has at least 20 characters")
 	}
 
 	if len(strings.TrimSpace(business.Description)) < 20 {
