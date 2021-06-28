@@ -139,7 +139,7 @@ func CreateBusiness(res http.ResponseWriter, req *http.Request) {
 	user, err := IsLoggedIn(req)
 
 	if err != nil {
-		http.Redirect(res, req, "/", http.StatusSeeOther)
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
 	}
 
@@ -163,7 +163,7 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 	user, err := IsLoggedIn(req)
 
 	if err != nil {
-		http.Redirect(res, req, "/", http.StatusSeeOther)
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
 	}
 
@@ -248,7 +248,7 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	_, err := strconv.Atoi(vars["id"])
 
 	if err != nil {
-		http.Redirect(res, req, "/", http.StatusNotFound)
+		http.Redirect(res, req, "/", http.StatusSeeOther)
 		return
 	}
 
@@ -256,7 +256,7 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	user, err := IsLoggedIn(req)
 
 	if err != nil {
-		http.Redirect(res, req, "/", http.StatusNotFound)
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
 	}
 
@@ -324,7 +324,7 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	user, err := IsLoggedIn(req)
 
 	if err != nil {
-		http.Redirect(res, req, "/", http.StatusSeeOther)
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
 	}
 

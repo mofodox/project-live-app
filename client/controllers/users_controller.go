@@ -178,8 +178,9 @@ func Login(res http.ResponseWriter, req *http.Request) {
 			PageTitle  string
 			ErrorMsg   string
 			SuccessMsg string
+			User       *models.User
 		}{
-			"User Login", "", "",
+			"User Login", "", "", nil,
 		}
 
 		tpl.ExecuteTemplate(res, "login.gohtml", payload)
