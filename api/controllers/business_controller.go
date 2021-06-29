@@ -14,6 +14,8 @@ import (
 	"github.com/mofodox/project-live-app/api/responses"
 )
 
+const BusinessSearchLimit = 5
+
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
@@ -214,7 +216,7 @@ func (server *Server) GetBusiness(res http.ResponseWriter, req *http.Request) {
 func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
-		name := req.FormValue("name")
+		query := req.FormValue("q")
 		status := strings.ToLower(req.FormValue("status"))
 		page := req.FormValue("page")
 
@@ -230,7 +232,7 @@ func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Reques
 			pageNo = 1
 		}
 
-		limit := 15
+		limit := BusinessSearchLimit
 		offset := (pageNo - 1) * limit
 
 		var businesses = []models.Business{}
@@ -238,8 +240,9 @@ func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Reques
 		// Construct query
 		result := server.DB.Offset(offset).Limit(limit)
 
-		if name != "" {
-			result = result.Where("name LIKE ?", "%"+name+"%")
+		// Just using sub string search for now inside business name / description / short description
+		if query != "" {
+			result = result.Where("name LIKE ?", "%"+query+"%").Or("description LIKE ?", "%"+query+"%").Or("short_description LIKE ?", "%"+query+"%")
 		}
 
 		if status != "" {

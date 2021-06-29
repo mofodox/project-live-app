@@ -55,27 +55,29 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 	pageNo := 1
 
 	if req.Method == http.MethodGet {
-		name := req.FormValue("q")
+		query := req.FormValue("q")
 		status := strings.ToLower(req.FormValue("status"))
 		page := req.FormValue("page")
 
 		// pagination
-		pageNo, err := strconv.Atoi(page)
+		p, err := strconv.Atoi(page)
 
-		if err != nil || pageNo <= 0 {
+		if err != nil || p <= 0 {
 			pageNo = 1
+		} else {
+			pageNo = p
 		}
 
-		querystring = "?pageNo=" + strconv.Itoa(pageNo)
+		querystring = "?page=" + strconv.Itoa(pageNo)
 
 		// status
 		if status != "" && status != "active" {
 			querystring += "&status=inactive"
 		}
 
-		// business name
-		if name != "" {
-			querystring += "&name=" + name
+		// string query
+		if query != "" {
+			querystring += "&q=" + query
 		}
 	}
 
@@ -119,9 +121,9 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 			"Businesses", 1, businesses, nil, "", "",
 		}
 
-		// page limit hardcoded to 15 at the moment on server side
+		// page limit hardcoded to 5 at the moment on server side
 		if pageNo > 1 {
-			payload.StartNo = pageNo - 1*15
+			payload.StartNo = (pageNo-1)*5 + 1
 		}
 
 		// Get User
