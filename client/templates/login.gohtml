@@ -7,6 +7,12 @@
         <div class="container">
             {{template "nav" .}}
 
+            {{ if .ErrorMsg }}
+            <div class="alert alert-danger" role="alert">
+                {{ ucFirst .ErrorMsg }}
+            </div>
+            {{ end }}
+
             <div class="row justify-content-md-center">
                 <div class="col-lg-8 col-offset-lg-4">
                     <h1 class="mb-5 pt-5">Login</h1>

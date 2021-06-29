@@ -121,7 +121,19 @@ func Register(res http.ResponseWriter, req *http.Request) {
 }
 
 func Login(res http.ResponseWriter, req *http.Request) {
+
+	// Anonymous payload
+	payload := struct {
+		PageTitle  string
+		ErrorMsg   string
+		SuccessMsg string
+		User       *models.User
+	}{
+		"User Login", "", "", nil,
+	}
+
 	if req.Method == http.MethodPost {
+
 		client := &http.Client{}
 
 		email := req.FormValue("email")
@@ -142,14 +154,12 @@ func Login(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			log.Fatalf("error response occured %v\n", err)
 		}
-
 		req.Header.Set("Content-Type", "application/json")
 
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		defer resp.Body.Close()
 
 		respBody, err := ioutil.ReadAll(resp.Body)
@@ -157,34 +167,28 @@ func Login(res http.ResponseWriter, req *http.Request) {
 			log.Fatalf("error repsonse body occurred %v\n", err)
 		}
 
-		tokenString := string(respBody)
-		tokenString = strings.TrimSuffix(tokenString, "\n")
-		tokenString = strings.ReplaceAll(tokenString, "\"", "")
+		fmt.Println(resp.StatusCode)
 
-		cookie := &http.Cookie{
-			Name:    "jwt-token",
-			Value:   tokenString,
-			Expires: time.Now().Add(time.Hour * 1),
+		if resp.StatusCode == 200 {
+			tokenString := string(respBody)
+			tokenString = strings.TrimSuffix(tokenString, "\n")
+			tokenString = strings.ReplaceAll(tokenString, "\"", "")
+
+			cookie := &http.Cookie{
+				Name:    "jwt-token",
+				Value:   tokenString,
+				Expires: time.Now().Add(time.Hour * 1),
+			}
+
+			http.SetCookie(res, cookie)
+			http.Redirect(res, req, "/", http.StatusFound)
+			return
+		} else {
+			payload.ErrorMsg = "Your account and/or password is incorrect, please try again"
 		}
-
-		// todo: handle wrong login info
-
-		http.SetCookie(res, cookie)
-		http.Redirect(res, req, "/", http.StatusFound)
-		return
-	} else {
-		// Anonymous payload
-		payload := struct {
-			PageTitle  string
-			ErrorMsg   string
-			SuccessMsg string
-			User       *models.User
-		}{
-			"User Login", "", "", nil,
-		}
-
-		tpl.ExecuteTemplate(res, "login.gohtml", payload)
 	}
+
+	tpl.ExecuteTemplate(res, "login.gohtml", payload)
 }
 
 func Logout(res http.ResponseWriter, req *http.Request) {
