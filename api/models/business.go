@@ -10,6 +10,12 @@ import (
 	"googlemaps.github.io/maps"
 )
 
+type BusinessSearchResult struct {
+	Businesses []*Business
+	Total      int
+	Limit      int // per page limit
+}
+
 type Business struct {
 	ID               uint32    `gorm:"PRIMARY_KEY;auto_increment" json:"id"`
 	UserID           uint32    `gorm:"type:int(10);not null" json:"userId"` // last user that edited. We're only keeping last edit.

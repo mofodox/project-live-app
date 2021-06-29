@@ -188,12 +188,12 @@ var comments = []models.Comment{
 }
 
 func Load(db *gorm.DB) {
-	err := db.Debug().DropTableIfExists(&models.User{}, &models.Business{}, &models.File{}, &models.Category{}).Error
+	err := db.Debug().DropTableIfExists(&models.User{}, &models.Business{}, &models.Category{}).Error
 	if err != nil {
 		log.Fatalf("cannot drop table: %v\n", err)
 	}
 
-	err = db.Debug().AutoMigrate(&models.User{}, &models.Business{}, &models.File{}, &models.Category{}).Error
+	err = db.Debug().AutoMigrate(&models.User{}, &models.Business{}, &models.Category{}).Error
 	if err != nil {
 		log.Fatalf("cannot migrate table: %v\n", err)
 	}

@@ -22,6 +22,8 @@ import (
 var tpl *template.Template
 var apiBaseURL string
 
+const BusinessSearchLimit = 5
+
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("error getting env values %v\n", err)
@@ -51,36 +53,36 @@ func init() {
 
 func ListBusiness(res http.ResponseWriter, req *http.Request) {
 
-	querystring := ""
 	pageNo := 1
 
-	if req.Method == http.MethodGet {
-		name := req.FormValue("q")
-		status := strings.ToLower(req.FormValue("status"))
-		page := req.FormValue("page")
+	q := req.FormValue("q")
+	status := strings.ToLower(req.FormValue("status"))
+	page := req.FormValue("page")
 
-		// pagination
-		pageNo, err := strconv.Atoi(page)
+	// pagination
+	p, err := strconv.Atoi(page)
 
-		if err != nil || pageNo <= 0 {
-			pageNo = 1
-		}
+	if err != nil || p <= 0 {
+		pageNo = 1
+	} else {
+		pageNo = p
+	}
 
-		querystring = "?pageNo=" + strconv.Itoa(pageNo)
+	querystring := "?page=" + strconv.Itoa(pageNo)
+	addtionalQuerystring := ""
 
-		// status
-		if status != "" && status != "active" {
-			querystring += "&status=inactive"
-		}
+	// status
+	if status != "" && status != "active" {
+		addtionalQuerystring += "&status=inactive"
+	}
 
-		// business name
-		if name != "" {
-			querystring += "&name=" + name
-		}
+	// query
+	if q != "" {
+		addtionalQuerystring += "&q=" + q
 	}
 
 	client := &http.Client{}
-	url := apiBaseURL + "/businesses" + querystring
+	url := apiBaseURL + "/businesses" + querystring + addtionalQuerystring
 	request, _ := http.NewRequest(http.MethodGet, url, nil)
 	request.Header.Set("Content-Type", "application/json")
 
@@ -98,8 +100,10 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 
 	// success
 	if response.StatusCode == 200 {
-		var businesses = []*models.Business{}
-		marshalErr := json.Unmarshal(data, &businesses)
+		//var businesses = []*models.Business{}
+		var businessSearchResult models.BusinessSearchResult
+
+		marshalErr := json.Unmarshal(data, &businessSearchResult)
 
 		if marshalErr != nil {
 			fmt.Println("Error decoding json at list businesses")
@@ -111,17 +115,34 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 		payload := struct {
 			PageTitle  string
 			StartNo    int
+			PrevURL    string
+			NextURL    string
+			Total      int
 			Businesses []*models.Business
 			User       *models.User
 			ErrorMsg   string
 			SuccessMsg string
 		}{
-			"Businesses", 1, businesses, nil, "", "",
+			"Businesses", 1, "", "", businessSearchResult.Total, businessSearchResult.Businesses, nil, "", "",
 		}
 
-		// page limit hardcoded to 15 at the moment on server side
+		// page limit
 		if pageNo > 1 {
-			payload.StartNo = pageNo - 1*15
+			payload.StartNo = (pageNo-1)*businessSearchResult.Limit + 1
+		}
+
+		// Pagination
+
+		// Previous Page
+		if payload.Total != 0 && pageNo > 1 {
+			querystring := "?page=" + strconv.Itoa(pageNo-1) + addtionalQuerystring
+			payload.PrevURL = querystring
+		}
+
+		// Next Page
+		if pageNo*businessSearchResult.Limit < payload.Total {
+			querystring := "?page=" + strconv.Itoa(pageNo+1) + addtionalQuerystring
+			payload.NextURL = querystring
 		}
 
 		// Get User
@@ -208,10 +229,10 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPost, apiBaseURL+"/businesses", bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
 	response, err := client.Do(request)
 
 	// handle error
@@ -236,15 +257,17 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		fmt.Println("Business created successfully")
 		http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(business.ID), 10), http.StatusFound)
 		return
 	} else {
 		// handle error
-		fmt.Println("Business creation failed")
 		var errorResponse responses.ErrorResponse
 		json.Unmarshal(respData, &errorResponse)
 		payload.ErrorMsg = errorResponse.Error
+
+		if strings.Contains(payload.ErrorMsg, "Duplicate entry") {
+			payload.ErrorMsg = "There's already a business with the name provided. Please use a different name."
+		}
 	}
 
 	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
@@ -279,7 +302,6 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 		"Update Business", user, nil, "", "",
 	}
 
-	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
@@ -367,10 +389,10 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/businesses/"+vars["id"], bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
 	response, err := client.Do(request)
 
 	// handle error
@@ -390,6 +412,10 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 		var errorResponse responses.ErrorResponse
 		json.Unmarshal(respData, &errorResponse)
 		payload.ErrorMsg = errorResponse.Error
+
+		if strings.Contains(payload.ErrorMsg, "Duplicate entry") {
+			payload.ErrorMsg = "There's already a business with the name provided. Please use a different name."
+		}
 	}
 
 	tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
@@ -425,7 +451,6 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 		payload.User = user
 	}
 
-	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")

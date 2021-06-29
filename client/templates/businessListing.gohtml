@@ -19,6 +19,16 @@
                         </div>
                     </a>
                 {{ end }}
+
+                <div class="d-flex align-items-center justify-content-center">
+                    {{ if .PrevURL }}
+                    <div class="mx-1"><a href="/business{{ .PrevURL }}"><<< Prev Page</a></div>
+                    {{ end }}
+
+                    {{ if .NextURL }}
+                    <div class="mx-1"><a href="/business{{ .NextURL }}">Next Page >>></a></div>
+                    {{ end }}
+                </div>
             {{ else }}
             <div>
                 No results found.
@@ -27,18 +37,5 @@
 
             {{template "footer"}}
         </div>
-
-        <style>
-            .business-item {
-                text-decoration: none;
-                color: #000;
-            }
-            .business-item:hover {
-                color: #444;
-            }
-            .business-name {
-                font-weight: bold;
-            }
-        </style>
     </body>
 </html>
