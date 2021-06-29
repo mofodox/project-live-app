@@ -237,15 +237,17 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		fmt.Println("Business created successfully")
 		http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(business.ID), 10), http.StatusFound)
 		return
 	} else {
 		// handle error
-		fmt.Println("Business creation failed")
 		var errorResponse responses.ErrorResponse
 		json.Unmarshal(respData, &errorResponse)
 		payload.ErrorMsg = errorResponse.Error
+
+		if strings.Contains(payload.ErrorMsg, "Duplicate entry") {
+			payload.ErrorMsg = "There's already a business with the name provided. Please use a different name."
+		}
 	}
 
 	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
@@ -392,6 +394,10 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 		var errorResponse responses.ErrorResponse
 		json.Unmarshal(respData, &errorResponse)
 		payload.ErrorMsg = errorResponse.Error
+
+		if strings.Contains(payload.ErrorMsg, "Duplicate entry") {
+			payload.ErrorMsg = "There's already a business with the name provided. Please use a different name."
+		}
 	}
 
 	tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
