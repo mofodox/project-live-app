@@ -1,17 +1,29 @@
 package controllers
 
 import (
-	"log"
 	"net/http"
-	"text/template"
+
+	"github.com/mofodox/project-live-app/api/models"
 )
 
 func Home(res http.ResponseWriter, req *http.Request) {
-	t, err := template.ParseFiles("templates/index.gohtml")
-	
-	if err != nil {
-		log.Fatalf("Error template home %v\n", err)
+
+	// anonymous payload
+	payload := struct {
+		PageTitle  string
+		User       *models.User
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"Businesses", nil, "", "",
 	}
 
-	t.Execute(res, nil)
+	// Get User
+	user, err := IsLoggedIn(req)
+
+	if err == nil {
+		payload.User = user
+	}
+
+	tpl.ExecuteTemplate(res, "index.gohtml", payload)
 }

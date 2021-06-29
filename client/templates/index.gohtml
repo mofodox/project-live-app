@@ -1,1 +1,23 @@
-<h1>Hello World</h1>
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {{template "header" .}}
+    </head>
+    <body>
+        <div class="container">
+            {{template "nav" .}}
+
+            <hr/>
+
+            <div>
+                <h3 class="mb-3"><strong>Hello there!</strong></h3>
+                <p>This is a project by group 5 of GoSchool Project Live Batch 4.</p>
+                <p>Ever since Covid-19, home based businesses (HBB) have been getting much more common. Our application's goal is to help bring awareness by being the "yellow pages" for HBB.</p>
+                <p>Registered users are able to create business listings and leave their comments / ratings.</p>
+                <p>Public users can browse and search for businesses.</p>
+            </div>
+
+            {{template "footer"}}
+        </div>
+    </body>
+</html>

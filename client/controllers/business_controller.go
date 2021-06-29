@@ -55,7 +55,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 	pageNo := 1
 
 	if req.Method == http.MethodGet {
-		name := req.FormValue("name")
+		name := req.FormValue("q")
 		status := strings.ToLower(req.FormValue("status"))
 		page := req.FormValue("page")
 

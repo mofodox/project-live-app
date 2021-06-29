@@ -78,7 +78,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 
 	responseBuffer := bytes.NewBuffer(data)
 
-	req, err = http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users", responseBuffer)
+	req, err = http.NewRequest(http.MethodPost, apiBaseURL+"/users", responseBuffer)
 	if err != nil {
 		log.Fatalf("error response occurred %v\n", err)
 	}
@@ -138,7 +138,7 @@ func Login(res http.ResponseWriter, req *http.Request) {
 
 		responseBuffer := bytes.NewBuffer(data)
 
-		req, err := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/users/login", responseBuffer)
+		req, err := http.NewRequest(http.MethodPost, apiBaseURL+"/users/login", responseBuffer)
 		if err != nil {
 			log.Fatalf("error response occured %v\n", err)
 		}
