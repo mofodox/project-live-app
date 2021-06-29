@@ -14,6 +14,7 @@ import (
 
 	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
+	"github.com/mofodox/project-live-app/api/responses"
 )
 
 func IsLoggedIn(req *http.Request) (*models.User, error) {
@@ -60,64 +61,87 @@ func IsLoggedIn(req *http.Request) (*models.User, error) {
 }
 
 func Register(res http.ResponseWriter, req *http.Request) {
-	client := &http.Client{}
-	var user models.User
 
-	fullname := req.FormValue("fullname")
-	email := req.FormValue("email")
-	password := req.FormValue("password")
+	// Get User
+	_, err := IsLoggedIn(req)
 
-	data, err := json.Marshal(map[string]string{
-		"fullname": fullname,
-		"email":    email,
-		"password": password,
-	})
-	if err != nil {
-		log.Fatalf("register error %v\n", err)
+	if err == nil {
+		// already logged in
+		http.Redirect(res, req, "/", http.StatusSeeOther)
 	}
-
-	responseBuffer := bytes.NewBuffer(data)
-
-	req, err = http.NewRequest(http.MethodPost, apiBaseURL+"/users", responseBuffer)
-	if err != nil {
-		log.Fatalf("error response occurred %v\n", err)
-	}
-
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer resp.Body.Close()
-
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	if err := json.Unmarshal(respBody, &user); err != nil {
-		log.Fatal(err)
-	}
-
-	log.Println("User registered")
 
 	// Anonymous payload
 	payload := struct {
 		PageTitle  string
 		ErrorMsg   string
 		SuccessMsg string
-		User       models.User
+		User       *models.User
 	}{
-		"User Register", "", "", user,
+		"User Register", "", "", nil,
 	}
 
-	fmt.Printf("user from payload %v\n", payload.User)
+	if req.Method == http.MethodPost {
+
+		fullname := req.FormValue("fullname")
+		email := req.FormValue("email")
+		password := req.FormValue("password")
+
+		data, err := json.Marshal(map[string]string{
+			"fullname": fullname,
+			"email":    email,
+			"password": password,
+		})
+		if err != nil {
+			log.Fatalf("register error %v\n", err)
+		}
+
+		responseBuffer := bytes.NewBuffer(data)
+
+		req, err = http.NewRequest(http.MethodPost, apiBaseURL+"/users", responseBuffer)
+		if err != nil {
+			log.Fatalf("error response occurred %v\n", err)
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer resp.Body.Close()
+
+		respBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var user models.User
+
+		if err := json.Unmarshal(respBody, &user); err != nil {
+			log.Fatal(err)
+		}
+
+		if resp.StatusCode == 201 {
+			log.Println("User registered")
+			fmt.Printf("user from payload %v\n", user)
+
+			// todo: possible to just set cookie and be login here?
+			http.Redirect(res, req, "/login", http.StatusSeeOther)
+			return
+		} else {
+			var errorResponse responses.ErrorResponse
+			json.Unmarshal(respBody, &errorResponse)
+			payload.ErrorMsg = errorResponse.Error
+
+			if strings.Contains(payload.ErrorMsg, "Duplicate") {
+				payload.ErrorMsg = "The email address provided is already registered."
+			}
+		}
+	}
 
 	tpl.ExecuteTemplate(res, "register.gohtml", payload)
-
-	http.Redirect(res, req, "/", http.StatusCreated)
 }
 
 func Login(res http.ResponseWriter, req *http.Request) {
@@ -167,8 +191,6 @@ func Login(res http.ResponseWriter, req *http.Request) {
 			log.Fatalf("error repsonse body occurred %v\n", err)
 		}
 
-		fmt.Println(resp.StatusCode)
-
 		if resp.StatusCode == 200 {
 			tokenString := string(respBody)
 			tokenString = strings.TrimSuffix(tokenString, "\n")
@@ -199,6 +221,5 @@ func Logout(res http.ResponseWriter, req *http.Request) {
 	}
 
 	http.SetCookie(res, cookie)
-
 	http.Redirect(res, req, "/", http.StatusSeeOther)
 }
