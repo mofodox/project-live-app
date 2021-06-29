@@ -38,13 +38,10 @@ func HandleRoutes(addr string) {
 	router.HandleFunc("/category/update/{id}", controllers.ProcessUpdateCategory).Methods("POST")
 	router.HandleFunc("/category/{id:[0-9]+}", controllers.ViewCategory).Methods("GET")
 
-<<<<<<< HEAD
 	// Comment Handlers
 	router.HandleFunc("/business/{id}/comment", controllers.CreateComment).Methods("GET")
-	router.HandleFunc("/business/{id}/comment", controllers.CreateComment).Methods("POST")
+	router.HandleFunc("/business/{id}/comment", controllers.ProcessCommentForm).Methods("POST")
 
-=======
->>>>>>> main
 	log.Printf("Starting server on port %s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, router))
 }
