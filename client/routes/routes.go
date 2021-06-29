@@ -12,6 +12,10 @@ func HandleRoutes(addr string) {
 
 	router := mux.NewRouter().StrictSlash(true)
 
+	fs := http.FileServer(http.Dir("./public"))
+	router.PathPrefix("/css/").Handler(fs)
+	router.PathPrefix("/files/").Handler(fs)
+
 	router.HandleFunc("/", controllers.Home)
 	router.HandleFunc("/register", controllers.Register).Methods("POST", "GET")
 	router.HandleFunc("/login", controllers.Login).Methods("POST", "GET")
@@ -34,8 +38,9 @@ func HandleRoutes(addr string) {
 	router.HandleFunc("/category/update/{id}", controllers.ProcessUpdateCategory).Methods("POST")
 	router.HandleFunc("/category/{id:[0-9]+}", controllers.ViewCategory).Methods("GET")
 
-	fs := http.FileServer(http.Dir("./public"))
-	router.PathPrefix("/css/").Handler(fs)
+	// Comment Handlers
+	router.HandleFunc("/business/{id}/comment", controllers.CreateComment).Methods("GET")
+	router.HandleFunc("/business/{id}/comment", controllers.CreateComment).Methods("POST")
 
 	log.Printf("Starting server on port %s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, router))

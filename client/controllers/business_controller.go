@@ -410,11 +410,12 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 		PageTitle   string
 		User        *models.User
 		Business    *models.Business
+		Comments    []*models.Comment
 		ErrorMsg    string
 		SuccessMsg  string
 		GMapsAPIKey string
 	}{
-		"View Business", nil, nil, "", "", os.Getenv("GMapsPublicAPI"),
+		"View Business", nil, nil, nil, "", "", os.Getenv("GMapsPublicAPI"),
 	}
 
 	// Get User
@@ -436,8 +437,8 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
 		return
 	}
-	defer response.Body.Close()
 
+	defer response.Body.Close()
 	data, _ := ioutil.ReadAll(response.Body)
 
 	// success
@@ -454,11 +455,45 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 		payload.PageTitle = business.Name
 		payload.Business = business
 
-		tpl.ExecuteTemplate(res, "viewBusiness.gohtml", payload)
-		return
 	} else {
 		// handle error
 		fmt.Println(string(data))
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	request, _ = http.NewRequest(http.MethodGet, apiBaseURL+"/business/"+vars["id"]+"/comments", nil)
+	request.Header.Set("Content-Type", "application/json")
+	response, err = client.Do(request)
+
+	// handle error
+	if err != nil {
+		fmt.Println("error sending view business comments request", err)
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+		return
+	}
+
+	data, _ = ioutil.ReadAll(response.Body)
+
+	// success
+	if response.StatusCode == 200 {
+		var bComments []*models.Comment
+		marshalErr := json.Unmarshal(data, &bComments)
+
+		if marshalErr != nil {
+			fmt.Println("error unmasharling at view business comments", marshalErr)
+			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+			return
+		}
+
+		payload.Comments = bComments
+
+		tpl.ExecuteTemplate(res, "viewBusiness.gohtml", payload)
+		return
+
+	} else {
+		// handle error
+		fmt.Println("Does this fail?")
 		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
 		return
 	}

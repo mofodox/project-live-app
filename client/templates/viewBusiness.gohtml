@@ -79,6 +79,28 @@
                 <a href="/business/update/{{ .Business.ID }}">Edit Business</a>
             </div>
 
+            <hr/>
+
+            {{ if gt (len .Comments) 0 }}
+                {{ range $key, $val := .Comments }}
+                        <div class="mb-3">
+                            <div class="userID">Written by: User # {{ $val.UserID }}</div>
+                            <div class="comment-content">{{ $val.Content }}</div>
+                            <div class="create-date">Written on: {{ $val.CreatedAt }}</div>
+                        </div>
+                {{ end }}
+            {{ else }}
+            <div>
+                No comments.
+            </div>
+            {{ end }}
+
+            <hr/>
+            
+            <div>
+                <a href="/business/{{ .Business.ID }}/comment">Add New Comment</a>
+            </div>
+
             {{template "footer"}}
         </div>
     </body>
