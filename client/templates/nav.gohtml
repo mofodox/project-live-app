@@ -1,18 +1,27 @@
 {{define "nav"}}
 <nav>
-    <div class="d-flex flex-column flex-md-row justify-content-end">
-        <div class="w-100 py-2 d-flex flex-column flex-md-row justify-content-between align-items-center">
-            <div class="branding fw-bold">
-                <h2><a class="py-2 pr-4 d-inline-block" href="/">wHBB</a></h2>
+    <div class="d-flex justify-content-between align-items-center my-3">
+        <div class="branding fw-bold">
+            <h2><a class="py-2 pr-4 d-inline-block" href="/">wHBB</a></h2>
+        </div>
+        <div class="d-flex">
+            <div class="me-2">
+                <form method="get" action="/business">
+                    <div class="input-group">
+                        <input class="form-control" type="search" value="" placeholder="Search" name="q">
+                    </div>
+                </form>
             </div>
-            <div>
-                {{ if .User }}
-                <a class="btn btn-primary btn-purple" href="/business/create" role="button">Add Business</a>
-                <a class="btn btn-primary btn-purple" href="/logout" role="button">Logout</a>
-                {{ else }}
-                <a class="btn btn-primary btn-purple" href="/login" role="button">Login</a>
-                {{ end }}
-            </div>
+
+            <a class="btn btn-primary btn-purple me-2" href="/business" role="button">Browse Businesses</a>
+
+            {{ if .User }}
+            <a class="btn btn-primary btn-purple me-2" href="/business/create" role="button">Add Business</a>
+            <a class="btn btn-primary btn-purple" href="/logout" role="button">Logout</a>
+            {{ else }}
+            <a class="btn btn-primary btn-purple me-2" href="/register" role="button">Register</a>
+            <a class="btn btn-primary btn-purple" href="/login" role="button">Login</a>
+            {{ end }}
         </div>
     </div>
 </nav>

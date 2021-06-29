@@ -134,8 +134,6 @@ func GetTokenID(tokenString string) (uint32, error) {
 		if err != nil {
 			return 0, err
 		}
-
-		fmt.Println("jwt-token")
 		return uint32(uid), nil
 	}
 
