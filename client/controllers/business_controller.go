@@ -212,6 +212,7 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPost, apiBaseURL+"/businesses", bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
 	response, err := client.Do(request)
 
 	// handle error
@@ -371,6 +372,7 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/businesses/"+vars["id"], bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
 	response, err := client.Do(request)
 
 	// handle error

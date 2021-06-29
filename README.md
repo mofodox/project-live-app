@@ -35,10 +35,11 @@ This is a project for our GoSchool Project Live Batch 4.
   |- routes
     |- routes.go
   |- templates
+  |- main.go (client start http server)
 - go.mod
 - go.sum
 - .env
-- main.go (start file)
+- main.go (rest api start http server)
 - README.md
 ```
 
@@ -54,7 +55,7 @@ Public users can browse and search for businesses.
 
 ## Team Members
 
-- [Alvin](https://github.com/xenodus)
+- [Alvin Yeoh](https://github.com/xenodus)
 - [Khairul](https://github.com/mofodox)
 - [Koh Shao Wei](https://github.com/ksw95)
 - [Sherman Lum](https://github.com/Smbsg) (Withdrawn)

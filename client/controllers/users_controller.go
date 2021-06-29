@@ -60,6 +60,16 @@ func IsLoggedIn(req *http.Request) (*models.User, error) {
 	return nil, errors.New("unable to fetch user")
 }
 
+func GetJWT(req *http.Request) string {
+
+	myCookie, err := req.Cookie("jwt-token")
+	if err == nil {
+		return myCookie.Value
+	}
+
+	return ""
+}
+
 func Register(res http.ResponseWriter, req *http.Request) {
 
 	// Get User
