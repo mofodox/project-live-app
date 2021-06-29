@@ -14,7 +14,7 @@ import (
 	"github.com/mofodox/project-live-app/api/responses"
 )
 
-const BusinessSearchLimit = 5
+const BusinessSearchLimit = 3
 
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
@@ -212,11 +212,11 @@ func (server *Server) GetBusiness(res http.ResponseWriter, req *http.Request) {
 	responses.ERROR(res, http.StatusNotFound, errors.New("business not found"))
 }
 
-// http://localhost:8080/api/v1/businesses/search?page=1&name=wayne
+// http://localhost:8080/api/v1/businesses/search?page=1&q=wayne
 func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
-		query := req.FormValue("q")
+		q := req.FormValue("q")
 		status := strings.ToLower(req.FormValue("status"))
 		page := req.FormValue("page")
 
@@ -235,28 +235,39 @@ func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Reques
 		limit := BusinessSearchLimit
 		offset := (pageNo - 1) * limit
 
-		var businesses = []models.Business{}
+		var businesses = []*models.Business{}
 
 		// Construct query
 		result := server.DB.Offset(offset).Limit(limit)
+		countResult := server.DB.Table("businesses")
 
 		// Just using sub string search for now inside business name / description / short description
-		if query != "" {
-			result = result.Where("name LIKE ?", "%"+query+"%").Or("description LIKE ?", "%"+query+"%").Or("short_description LIKE ?", "%"+query+"%")
+		if q != "" {
+			result = result.Where("name LIKE ?", "%"+q+"%").Or("description LIKE ?", "%"+q+"%").Or("short_description LIKE ?", "%"+q+"%")
+			countResult = countResult.Where("name LIKE ?", "%"+q+"%").Or("description LIKE ?", "%"+q+"%").Or("short_description LIKE ?", "%"+q+"%")
 		}
 
 		if status != "" {
 			result = result.Where("status = ?", status)
+			countResult = countResult.Where("status = ?", status)
 		}
 
+		var count int
 		result = result.Find(&businesses).Order("name")
+		_ = countResult.Count(&count)
 
 		if result.Error != nil {
 			responses.ERROR(res, http.StatusInternalServerError, result.Error)
 			return
 		}
 
-		responses.JSON(res, http.StatusOK, businesses)
+		var businessSearchResult models.BusinessSearchResult
+
+		businessSearchResult.Businesses = businesses
+		businessSearchResult.Total = count
+		businessSearchResult.Limit = BusinessSearchLimit
+
+		responses.JSON(res, http.StatusOK, businessSearchResult)
 		return
 	}
 
