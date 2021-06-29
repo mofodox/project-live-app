@@ -134,7 +134,22 @@ func Register(res http.ResponseWriter, req *http.Request) {
 		}
 
 		if resp.StatusCode == 201 {
-			// todo: possible to just set cookie and be login here?
+
+			// auto login user
+			tokenString, err := sendLoginRequest(email, password)
+
+			if err == nil {
+				cookie := &http.Cookie{
+					Name:    "jwt-token",
+					Value:   tokenString,
+					Expires: time.Now().Add(time.Hour * 1),
+				}
+
+				http.SetCookie(res, cookie)
+				http.Redirect(res, req, "/", http.StatusFound)
+				return
+			}
+
 			http.Redirect(res, req, "/login", http.StatusSeeOther)
 			return
 		} else {
@@ -151,6 +166,48 @@ func Register(res http.ResponseWriter, req *http.Request) {
 	tpl.ExecuteTemplate(res, "register.gohtml", payload)
 }
 
+func sendLoginRequest(email string, password string) (string, error) {
+	client := &http.Client{}
+
+	// Marshal struct to json
+	data, err := json.Marshal(map[string]string{
+		"email":    email,
+		"password": password,
+	})
+	if err != nil {
+		return "", errors.New("error marshaling login request")
+	}
+
+	responseBuffer := bytes.NewBuffer(data)
+
+	req, err := http.NewRequest(http.MethodPost, apiBaseURL+"/users/login", responseBuffer)
+	if err != nil {
+		log.Fatalf("error response occured %v\n", err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("error response body occurred %v\n", err)
+	}
+
+	if resp.StatusCode == 200 {
+		tokenString := string(respBody)
+		tokenString = strings.TrimSuffix(tokenString, "\n")
+		tokenString = strings.ReplaceAll(tokenString, "\"", "")
+
+		return tokenString, nil
+	}
+
+	return "", errors.New("your account and/or password is incorrect, please try again")
+}
+
 func Login(res http.ResponseWriter, req *http.Request) {
 
 	// Anonymous payload
@@ -165,44 +222,11 @@ func Login(res http.ResponseWriter, req *http.Request) {
 
 	if req.Method == http.MethodPost {
 
-		client := &http.Client{}
-
 		email := req.FormValue("email")
 		password := req.FormValue("password")
+		tokenString, err := sendLoginRequest(email, password)
 
-		// Marshal struct to json
-		data, err := json.Marshal(map[string]string{
-			"email":    email,
-			"password": password,
-		})
-		if err != nil {
-			log.Fatalf("login error %v\n", err)
-		}
-
-		responseBuffer := bytes.NewBuffer(data)
-
-		req, err := http.NewRequest(http.MethodPost, apiBaseURL+"/users/login", responseBuffer)
-		if err != nil {
-			log.Fatalf("error response occured %v\n", err)
-		}
-		req.Header.Set("Content-Type", "application/json")
-
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer resp.Body.Close()
-
-		respBody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatalf("error repsonse body occurred %v\n", err)
-		}
-
-		if resp.StatusCode == 200 {
-			tokenString := string(respBody)
-			tokenString = strings.TrimSuffix(tokenString, "\n")
-			tokenString = strings.ReplaceAll(tokenString, "\"", "")
-
+		if err == nil {
 			cookie := &http.Cookie{
 				Name:    "jwt-token",
 				Value:   tokenString,
@@ -212,9 +236,9 @@ func Login(res http.ResponseWriter, req *http.Request) {
 			http.SetCookie(res, cookie)
 			http.Redirect(res, req, "/", http.StatusFound)
 			return
-		} else {
-			payload.ErrorMsg = "Your account and/or password is incorrect, please try again"
 		}
+
+		payload.ErrorMsg = err.Error()
 	}
 
 	tpl.ExecuteTemplate(res, "login.gohtml", payload)
