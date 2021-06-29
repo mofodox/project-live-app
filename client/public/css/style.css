@@ -1,3 +1,11 @@
+body {
+    font-family: 'Roboto', sans-serif;
+}
+
+.branding h2 a {
+    font-weight: 500;
+}
+
 .btn-purple {
     color: #fff;
     background-color: #9257ed;
