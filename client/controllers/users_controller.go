@@ -124,9 +124,6 @@ func Register(res http.ResponseWriter, req *http.Request) {
 		}
 
 		if resp.StatusCode == 201 {
-			log.Println("User registered")
-			fmt.Printf("user from payload %v\n", user)
-
 			// todo: possible to just set cookie and be login here?
 			http.Redirect(res, req, "/login", http.StatusSeeOther)
 			return
