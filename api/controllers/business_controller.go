@@ -14,7 +14,7 @@ import (
 	"github.com/mofodox/project-live-app/api/responses"
 )
 
-const BusinessSearchLimit = 3
+const BusinessSearchLimit = 5
 
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
