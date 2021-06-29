@@ -8,3 +8,14 @@
     background-color: #784abe;
     border-color: #784abe;
 }
+
+.business-item {
+    text-decoration: none;
+    color: #000;
+}
+.business-item:hover {
+    color: #444;
+}
+.business-name {
+    font-weight: bold;
+}
