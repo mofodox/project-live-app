@@ -288,7 +288,7 @@ func ShowProfile(res http.ResponseWriter, req *http.Request) {
 	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 
-	response, err:= client.Do(req)
+	response, err:= client.Do(request)
 	if err != nil {
 		fmt.Println("error sending get user request", err)
 		http.Redirect(res, req, "/business", http.StatusTemporaryRedirect)
@@ -405,16 +405,9 @@ func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 	email := req.FormValue("email")
 	password := req.FormValue("password")
 
-	updatedPassword, err := models.Hash(password)
-	if err != nil {
-		fmt.Println("error hashing the updated password", err)
-		http.Redirect(res, req, "/users/" + vars["id"], http.StatusSeeOther)
-		return
-	}
-
 	user.Fullname = fullname
 	user.Email = email
-	user.Password = string(updatedPassword)
+	user.Password = password
 
 	payload := struct {
 		PageTitle string
@@ -439,7 +432,7 @@ func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer " + GetJWT(req))
 	
-	response, err := client.Do(req)
+	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("error sending process update user request", err)
 		payload.ErrorMsg = "An unexpected error has occured while updating user. Please try again."
