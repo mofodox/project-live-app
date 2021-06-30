@@ -35,6 +35,7 @@ type Business struct {
 	Facebook         string    `gorm:"size:255;" json:"facebook"`
 	CreatedAt        time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt        time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+	Distance         float64   `gorm:"-" json:"distance"`
 }
 
 func (business *Business) Validate() error {
@@ -120,6 +121,29 @@ func (business *Business) Geocode() (lat float64, lnt float64, err error) {
 		business.Lng = results[0].Geometry.Location.Lng
 
 		return business.Lat, business.Lng, nil
+	}
+
+	return 0, 0, errors.New("unable to fetch lat/lng")
+}
+
+func Geocode(address string) (lat float64, lnt float64, err error) {
+
+	var gMapsAPI = os.Getenv("GMapsAPI")
+	c, err := maps.NewClient(maps.WithAPIKey(gMapsAPI))
+
+	if err != nil {
+		return 0, 0, errors.New("unable to fetch lat/lng")
+	}
+
+	r := &maps.GeocodingRequest{
+		Address: address,
+		Region:  "SG",
+	}
+
+	results, err := c.Geocode(context.Background(), r)
+
+	if err == nil && len(results) > 0 {
+		return results[0].Geometry.Location.Lat, results[0].Geometry.Location.Lng, nil
 	}
 
 	return 0, 0, errors.New("unable to fetch lat/lng")
