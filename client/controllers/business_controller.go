@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
@@ -46,6 +47,14 @@ func init() {
 			tmp[0] = unicode.ToUpper(tmp[0])
 			return string(tmp)
 		},
+
+		"formatDistance": func(distance float64) string {
+			if distance > 1 {
+				return fmt.Sprint(math.Floor(distance*100)/100) + " KM"
+			} else {
+				return fmt.Sprint(math.Floor(distance*100)) + " M"
+			}
+		},
 	}
 
 	tpl = template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/*"))
@@ -54,6 +63,7 @@ func init() {
 func ListBusiness(res http.ResponseWriter, req *http.Request) {
 
 	pageNo := 1
+	searchedLocation := ""
 
 	q := req.FormValue("q")
 	status := strings.ToLower(req.FormValue("status"))
@@ -82,6 +92,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 		if strings.Contains(strings.ToLower(q), "location:") {
 			q = strings.ReplaceAll(strings.ToLower(q), "location:", "")
 			addtionalQuerystring += "&location=" + q
+			searchedLocation = q
 		} else {
 			addtionalQuerystring += "&q=" + q
 		}
@@ -120,6 +131,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 		// anonymous payload
 		payload := struct {
 			PageTitle  string
+			Location   string
 			StartNo    int
 			PrevURL    string
 			NextURL    string
@@ -129,7 +141,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 			ErrorMsg   string
 			SuccessMsg string
 		}{
-			"Businesses", 1, "", "", businessSearchResult.Total, businessSearchResult.Businesses, nil, "", "",
+			"Businesses", searchedLocation, 1, "", "", businessSearchResult.Total, businessSearchResult.Businesses, nil, "", "",
 		}
 
 		// page limit

@@ -17,7 +17,7 @@ import (
 const BusinessSearchLimit = 5
 
 // Unit of measurement: KM
-const BusinessLocationRadius = 5
+const BusinessLocationRadius = 3
 
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
