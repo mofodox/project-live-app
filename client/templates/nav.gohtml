@@ -11,10 +11,15 @@
             </div>
         {{ end }}
         <div class="d-flex">
-            <div class="me-2">
+            <div>
                 <form method="get" action="/business">
                     <div class="input-group">
                         <input class="form-control" type="search" value="" placeholder="Search" name="q">
+                        <span class="input-group-append" style="margin-right: 16px;">
+                            <button class="btn btn-outline-secondary" style="border-color: #ced4da;" type="button">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
                     </div>
                 </form>
             </div>
