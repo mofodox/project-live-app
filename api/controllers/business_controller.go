@@ -19,6 +19,14 @@ const BusinessSearchLimit = 5
 // Unit of measurement: KM
 const BusinessLocationRadius = 3
 
+func (server *Server) GeoCodeSave(business *models.Business) {
+	_, _, err := business.Geocode()
+
+	if err == nil {
+		server.DB.Save(&business)
+	}
+}
+
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
@@ -48,13 +56,12 @@ func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request)
 
 			newBusiness.UserID = userId
 
+			result := server.DB.Create(&newBusiness)
+
 			// get lat / lng automatically
 			if newBusiness.Lat == 0 && newBusiness.Lng == 0 {
-				// todo: change to go routine
-				newBusiness.Geocode()
+				go server.GeoCodeSave(newBusiness)
 			}
-
-			result := server.DB.Create(&newBusiness)
 
 			if result.Error != nil {
 				responses.ERROR(res, http.StatusInternalServerError, result.Error)
@@ -171,9 +178,11 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 			business.Instagram = updatedBusiness.Instagram
 			business.Facebook = updatedBusiness.Facebook
 
-			business.Geocode()
+			// business.Geocode()
 
 			result := server.DB.Save(&business)
+
+			go server.GeoCodeSave(&business)
 
 			if result.Error != nil {
 				responses.ERROR(res, http.StatusInternalServerError, result.Error)
