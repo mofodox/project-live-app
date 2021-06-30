@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {{template "header" .}}
+    </head>
+    <body>
+        <div class="container">
+            {{template "nav" .}}
+
+            <hr/>
+
+            {{ if .ErrorMsg }}
+            <div class="alert alert-danger" role="alert">
+                {{ ucFirst .ErrorMsg }}
+            </div>
+            {{ end }}
+
+            <h1>User Profile</h1>
+            <br/>
+
+            <div>
+                <p>{{.User.Email}}</p>
+            </div>
+
+            {{template "footer"}}
+        </div>
+    </body>
+</html>
