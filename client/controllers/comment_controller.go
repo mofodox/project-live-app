@@ -71,6 +71,7 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/comment/", reqBody)
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
 
 	response, err := client.Do(request)
 	if err != nil {
@@ -183,6 +184,7 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
 
 	response, err := client.Do(request)
 	if err != nil {
@@ -214,6 +216,7 @@ func DeleteComment(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodDelete, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
 	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
 
 	response, err := client.Do(request)
 	if err != nil {
