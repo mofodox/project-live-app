@@ -92,6 +92,9 @@
                                 </div>
                             </div>
                             <div class="comment-content">{{ $val.Content }}</div>
+                            <div>
+                                <small><a href="/comment/edit/{{ $val.CommentID }}"><i class="fas fa-pencil-alt"></i> Edit</a></small>
+                            </div>
                         </div>
                 {{ end }}
             {{ else }}
