@@ -54,7 +54,7 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 		"Create Business", nil, "", "",
 	}
 
-	comment := req.FormValue("content")
+	comment := req.FormValue("comment")
 	var newComment models.Comment
 
 	newComment.BusinessID = uint32(bID)
@@ -167,6 +167,12 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusNotFound)
 		return
 	}
+	_, err = strconv.Atoi(vars["bID"])
+	if err != nil {
+		// Redirect to Index Page
+		http.Redirect(res, req, "/", http.StatusNotFound)
+		return
+	}
 	payload := struct {
 		PageTitle  string
 		Comment    *models.Comment
@@ -176,7 +182,7 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 		"Edit Comment", nil, "", "",
 	}
 	var comment models.Comment
-	content := req.FormValue("content")
+	content := req.FormValue("comment")
 	comment.Content = content
 
 	payload.Comment = &comment
@@ -189,6 +195,7 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("")
+		http.Redirect(res, req, "/business/"+vars["bID"], http.StatusSeeOther)
 	} else {
 		resBody, _ := ioutil.ReadAll(response.Body)
 
@@ -213,6 +220,11 @@ func DeleteComment(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusNotFound)
 		return
 	}
+	_, err = strconv.Atoi(vars["bID"])
+	if err != nil {
+		http.Redirect(res, req, "/", http.StatusNotFound)
+		return
+	}
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodDelete, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
 	request.Header.Set("Content-Type", "application/json")
@@ -221,10 +233,11 @@ func DeleteComment(res http.ResponseWriter, req *http.Request) {
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("Comment deletion failed, error sending http request")
+		http.Redirect(res, req, "/business/"+vars["bID"], http.StatusSeeOther)
 	} else {
 		if response.StatusCode == 200 {
 			fmt.Println("Comment deleted successfully")
-			http.Redirect(res, req, "/", http.StatusSeeOther)
+			http.Redirect(res, req, "/business/"+vars["bID"], http.StatusSeeOther)
 		}
 	}
 }
