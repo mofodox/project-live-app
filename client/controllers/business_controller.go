@@ -50,9 +50,9 @@ func init() {
 
 		"formatDistance": func(distance float64) string {
 			if distance > 1 {
-				return fmt.Sprint(math.Floor(distance*100)/100) + " KM"
+				return fmt.Sprint(math.Floor(distance*100)/100) + "KM"
 			} else {
-				return fmt.Sprint(math.Floor(distance*100)) + " M"
+				return fmt.Sprint(math.Floor(distance*100)) + "M"
 			}
 		},
 	}
