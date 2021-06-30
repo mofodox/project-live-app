@@ -20,6 +20,7 @@ func HandleRoutes(addr string) {
 	router.HandleFunc("/register", controllers.Register).Methods("POST", "GET")
 	router.HandleFunc("/login", controllers.Login).Methods("POST", "GET")
 	router.HandleFunc("/logout", controllers.Logout).Methods("GET")
+	router.HandleFunc("/users/{id}", controllers.GetProfile).Methods("GET")
 
 	// Business Handlers
 	router.HandleFunc("/business", controllers.ListBusiness).Methods("GET")
@@ -41,8 +42,11 @@ func HandleRoutes(addr string) {
 	// Comment Handlers
 	router.HandleFunc("/business/{id}/comment", controllers.CreateComment).Methods("GET")
 	router.HandleFunc("/business/{id}/comment", controllers.ProcessCommentForm).Methods("POST")
+<<<<<<< HEAD
 	router.HandleFunc("/business/{bID}/comment/{cID}", controllers.ViewComment).Methods("GET")
 	router.HandleFunc("/comment/{cID}/delete", controllers.DeleteComment)
+=======
+>>>>>>> main
 
 	log.Printf("Starting server on port %s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, router))

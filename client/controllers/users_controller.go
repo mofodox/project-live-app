@@ -77,7 +77,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 
 	if err == nil {
 		// already logged in
-		http.Redirect(res, req, "/", http.StatusSeeOther)
+		http.Redirect(res, req, "/business", http.StatusSeeOther)
 	}
 
 	// Anonymous payload
@@ -143,6 +143,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 					Name:    "jwt-token",
 					Value:   tokenString,
 					Expires: time.Now().Add(time.Hour * 1),
+					HttpOnly: true,
 				}
 
 				http.SetCookie(res, cookie)
@@ -150,7 +151,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 				return
 			}
 
-			http.Redirect(res, req, "/login", http.StatusSeeOther)
+			http.Redirect(res, req, "/business", http.StatusSeeOther)
 			return
 		} else {
 			var errorResponse responses.ErrorResponse
@@ -231,10 +232,11 @@ func Login(res http.ResponseWriter, req *http.Request) {
 				Name:    "jwt-token",
 				Value:   tokenString,
 				Expires: time.Now().Add(time.Hour * 1),
+				HttpOnly: true,
 			}
 
 			http.SetCookie(res, cookie)
-			http.Redirect(res, req, "/", http.StatusFound)
+			http.Redirect(res, req, "/business", http.StatusSeeOther)
 			return
 		}
 
@@ -252,5 +254,28 @@ func Logout(res http.ResponseWriter, req *http.Request) {
 	}
 
 	http.SetCookie(res, cookie)
-	http.Redirect(res, req, "/", http.StatusSeeOther)
+	http.Redirect(res, req, "/business", http.StatusSeeOther)
+}
+
+func GetProfile(res http.ResponseWriter, req *http.Request) {
+	// Anonymous payload
+	payload := struct {
+		PageTitle  string
+		ErrorMsg   string
+		SuccessMsg string
+		User       *models.User
+	}{
+		"User Profile", "", "", nil,
+	}
+
+	user, err := IsLoggedIn(req)
+	if err != nil {
+		log.Fatalf("unable to get the requested user: %v\n", err)
+	}
+
+	fmt.Printf("user: %v\n", user)
+
+	payload.User = user
+
+	tpl.ExecuteTemplate(res, "showUserProfile.gohtml", payload)
 }

@@ -16,6 +16,9 @@ import (
 
 const BusinessSearchLimit = 5
 
+// Unit of measurement: KM
+const BusinessLocationRadius = 3
+
 func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	if req.Header.Get("Content-type") == "application/json" {
@@ -34,9 +37,8 @@ func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request)
 			// convert JSON to object
 			json.Unmarshal(reqBody, &newBusiness)
 
-			// todo: sanitization
-
-			// validation
+			// sanitization & validation
+			newBusiness.Sanitize()
 			err := newBusiness.Validate()
 
 			if err != nil {
@@ -145,9 +147,8 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 			// convert JSON to object
 			json.Unmarshal(reqBody, &updatedBusiness)
 
-			// todo: sanitization
-
-			// validation
+			// sanitization & validation
+			updatedBusiness.Sanitize()
 			err := updatedBusiness.Validate()
 
 			if err != nil {
@@ -219,6 +220,13 @@ func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Reques
 		q := req.FormValue("q")
 		status := strings.ToLower(req.FormValue("status"))
 		page := req.FormValue("page")
+		location := req.FormValue("location")
+
+		var lat, lng float64 = 0, 0
+		if location != "" {
+			// geocode to get lat/lng of location string
+			lat, lng, _ = models.Geocode(location)
+		}
 
 		// Status
 		if status != "" && status != "active" {
@@ -238,8 +246,8 @@ func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Reques
 		var businesses = []*models.Business{}
 
 		// Construct query
-		result := server.DB.Offset(offset).Limit(limit)
-		countResult := server.DB.Table("businesses")
+		result := server.DB.Debug()
+		countResult := server.DB.Debug().Table("businesses")
 
 		// Just using sub string search for now inside business name / description / short description
 		if q != "" {
@@ -252,8 +260,14 @@ func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Reques
 			countResult = countResult.Where("status = ?", status)
 		}
 
+		if lat != 0 && lng != 0 {
+			result = result.Select("*, (((acos(sin((?*pi()/180)) * sin((`lat`*pi()/180)) + cos((?*pi()/180)) * cos((`lat`*pi()/180)) * cos(((?-`lng`) * pi()/180)))) * 180/pi()) * 60 * 1.1515 * 1.609344) as distance", lat, lat, lng)
+			result = result.Having("distance <= ?", BusinessLocationRadius)
+			countResult = countResult.Where("(((acos(sin((?*pi()/180)) * sin((`lat`*pi()/180)) + cos((?*pi()/180)) * cos((`lat`*pi()/180)) * cos(((?-`lng`) * pi()/180)))) * 180/pi()) * 60 * 1.1515 * 1.609344) <= ?", lat, lat, lng, BusinessLocationRadius)
+		}
+
 		var count int
-		result = result.Find(&businesses).Order("name")
+		result = result.Offset(offset).Limit(limit).Find(&businesses).Order("name")
 		_ = countResult.Count(&count)
 
 		if result.Error != nil {

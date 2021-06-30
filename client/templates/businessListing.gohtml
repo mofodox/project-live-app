@@ -9,13 +9,23 @@
 
             <hr/>
 
+            <h1 class="mb-4">Businesses</h1>
+
             {{ if gt (len .Businesses) 0 }}
+
+                {{ if .Total }}
+                    <div class="mb-3">Showing {{ .Total }} results {{ if .Location }} from "{{ .Location }}" {{ end }}</div>
+                {{ end }}
+
                 {{ range $key, $val := .Businesses }}
                     <a class="business-item" href="/business/{{ $val.ID }}">
                         <div class="mb-3">
                             <div class="business-name">{{ add $key $.StartNo }}. {{ $val.Name }}</div>
                             <div class="business-short-description">{{ $val.ShortDescription }}</div>
                             <div class="business-pickup">Self-Pickup: {{ if $val.Address }}<i class="fas fa-check text-success"></i>{{ else }}<i class="fas fa-times text-danger"></i>{{ end }}</div>
+                            {{ if $val.Distance }}
+                            <div>Approximate Distance: {{ formatDistance $val.Distance }}</div>
+                            {{ end }}
                         </div>
                     </a>
                 {{ end }}
