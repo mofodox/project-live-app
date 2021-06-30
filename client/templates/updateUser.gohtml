@@ -9,33 +9,33 @@
 
             <hr/>
 
-            {{/* {{ if .ErrorMsg }}
+            {{ if .ErrorMsg }}
             <div class="alert alert-danger" role="alert">
                 {{ ucFirst .ErrorMsg }}
             </div>
-            {{ end }} */}}
+            {{ end }}
 
-            <h1>Login</h1>
+            <h1>Update User Profile</h1>
             <br/>
 
             <div>
                 <form method="POST" class="mb-5">
                     <div class="form-group mb-3">
                         <label for="fullname" class="form-label">Full Name</label>
-                        <input class="form-control" type="text" name="fullname" placeholder="Enter your fullname">
+                        <input class="form-control" type="text" name="fullname" value="{{ .User.Fullname }}" placeholder="Enter your fullname">
                     </div>
 
                     <div class="form-group mb-3">
                         <label for="email" class="form-label">Email</label>
-                        <input class="form-control" type="email" name="email" placeholder="Enter your email address">
+                        <input class="form-control" type="email" name="email" value="{{ .User.Email }}"placeholder="Enter your email address">
                     </div>
 
                     <div class="form-group mb-3">
                         <label for="password" class="form-label">Password</label>
-                        <input class="form-control" type="password" name="password" placeholder="Enter your password">
+                        <input class="form-control" type="password" name="password" value="{{ .User.Password }}" placeholder="Enter your password">
                     </div>
 
-                    <button class="btn btn-primary btn-purple" type="submit">Login</button>
+                    <button class="btn btn-primary btn-purple" type="submit">Update</button>
                 </form>
             </div>
 

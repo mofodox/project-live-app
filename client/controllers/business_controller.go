@@ -12,6 +12,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 	"unicode"
 
 	"github.com/gorilla/mux"
@@ -54,6 +55,10 @@ func init() {
 			} else {
 				return fmt.Sprint(math.Floor(distance*100)) + "M"
 			}
+		},
+
+		"formatCommentDate": func(t time.Time) string {
+			return t.Format("2 Jan 2006 3:04 PM")
 		},
 	}
 

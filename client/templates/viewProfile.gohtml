@@ -9,15 +9,17 @@
 
             <hr/>
 
-            <h1>Profile</h1>
+            {{ if .ErrorMsg }}
+            <div class="alert alert-danger" role="alert">
+                {{ ucFirst .ErrorMsg }}
+            </div>
+            {{ end }}
 
+            <h1>User Profile</h1>
             <br/>
 
             <div>
-               <p>{{ .User.Fullname }}</p>
-               <p>{{ .User.Email }}</p>
-               
-               <a href="/users/edit">Edit Profile</a>
+                <p>{{.User.Email}}</p>
             </div>
 
             {{template "footer"}}
