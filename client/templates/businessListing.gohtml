@@ -14,7 +14,7 @@
             {{ if gt (len .Businesses) 0 }}
 
                 {{ if .Total }}
-                    <div class="mb-3">{{ .Total }} total results {{ if .Location }} within 3KM of "{{ .Location }}" {{ end }}</div>
+                    <div class="mb-3">{{ .Total }} total result{{ if gt .Total 1 }}s{{end}} {{ if .Location }} within 3KM of "{{ .Location }}" {{ end }}</div>
                 {{ end }}
 
                 {{ range $key, $val := .Businesses }}
