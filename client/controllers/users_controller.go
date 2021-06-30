@@ -256,3 +256,26 @@ func Logout(res http.ResponseWriter, req *http.Request) {
 	http.SetCookie(res, cookie)
 	http.Redirect(res, req, "/business", http.StatusSeeOther)
 }
+
+func GetProfile(res http.ResponseWriter, req *http.Request) {
+	// Anonymous payload
+	payload := struct {
+		PageTitle  string
+		ErrorMsg   string
+		SuccessMsg string
+		User       *models.User
+	}{
+		"User Profile", "", "", nil,
+	}
+
+	user, err := IsLoggedIn(req)
+	if err != nil {
+		log.Fatalf("unable to get the requested user: %v\n", err)
+	}
+
+	fmt.Printf("user: %v\n", user)
+
+	payload.User = user
+
+	tpl.ExecuteTemplate(res, "showUserProfile.gohtml", payload)
+}
