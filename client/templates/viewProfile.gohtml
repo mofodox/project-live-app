@@ -21,6 +21,8 @@
             <div>
                 <p>{{.User.Fullname}}</p>
                 <p>{{.User.Email}}</p>
+
+                <a href="/users/edit/{{.User.ID}}">Update Profile</a>
             </div>
 
             {{template "footer"}}
