@@ -93,7 +93,8 @@
                             </div>
                             <div class="comment-content">{{ $val.Content }}</div>
                             <div>
-                                <small><a href="/comment/edit/{{ $val.CommentID }}"><i class="fas fa-pencil-alt"></i> Edit</a></small>
+                                <small><a href="/comment/{{ $val.CommentID }}/edit"><i class="fas fa-pencil-alt"></i> Edit</a></small>
+                                <small><a href="/comment/{{ $val.CommentID }}/delete"><i class="fas fa-pencil-alt"></i> Delete</a></small>
                             </div>
                         </div>
                 {{ end }}
