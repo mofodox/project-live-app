@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
@@ -257,25 +258,208 @@ func Logout(res http.ResponseWriter, req *http.Request) {
 	http.Redirect(res, req, "/business", http.StatusSeeOther)
 }
 
-func GetProfile(res http.ResponseWriter, req *http.Request) {
-	// Anonymous payload
-	payload := struct {
-		PageTitle  string
-		ErrorMsg   string
-		SuccessMsg string
-		User       *models.User
-	}{
-		"User Profile", "", "", nil,
+func ShowProfile(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	_, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Redirect(res, req, "/business", http.StatusSeeOther)
+		return
 	}
 
 	user, err := IsLoggedIn(req)
 	if err != nil {
-		log.Fatalf("unable to get the requested user: %v\n", err)
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
+		return
 	}
 
-	fmt.Printf("user: %v\n", user)
+	// anonymous payload
+	payload := struct {
+		PageTitle  string
+		User       *models.User
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"View Profile", user, "", "",
+	}
 
-	payload.User = user
+	client := &http.Client{}
+	
+	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+vars["id"], nil)
+	request.Header.Set("Content-Type", "application/json")
 
-	tpl.ExecuteTemplate(res, "showUserProfile.gohtml", payload)
+	response, err:= client.Do(req)
+	if err != nil {
+		fmt.Println("error sending get user request", err)
+		http.Redirect(res, req, "/business", http.StatusTemporaryRedirect)
+		return
+	}
+	defer response.Body.Close()
+
+	data, _ := ioutil.ReadAll(response.Body)
+
+	if response.StatusCode == 200 {
+		var user *models.User
+		marshalErr := json.Unmarshal(data, &user)
+
+		if marshalErr != nil {
+			fmt.Println("error unmarshaling at getting user", marshalErr)
+			http.Redirect(res, req, "/business", http.StatusTemporaryRedirect)
+			return
+		}
+
+		payload.User = user
+
+		tpl.ExecuteTemplate(res, "viewProfile.gohtml", payload)
+		fmt.Println("GET View Profile payload", payload.User)
+		return
+	} else {
+		// handle error
+		fmt.Println(string(data))
+		http.Redirect(res, req, "/business", http.StatusTemporaryRedirect)
+		return
+	}
+}
+
+func UpdateProfile(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+
+	_, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Redirect(res, req, "/", http.StatusSeeOther)
+		return
+	}
+
+	user, err := IsLoggedIn(req)
+
+	if err != nil {
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
+		return
+	}
+
+	// anonymous payload
+	payload := struct {
+		PageTitle  string
+		User       *models.User
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"Update Profile", user, "", "",
+	}
+
+	client := &http.Client{}
+
+	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+vars["id"], nil)
+	request.Header.Set("Content-Type", "application/json")
+	response, err := client.Do(request)
+
+	if err != nil {
+		fmt.Println("error sending get user request", err)
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+		return
+	}
+	defer response.Body.Close()
+
+	data, _ := ioutil.ReadAll(response.Body)
+
+	// success
+	if response.StatusCode == 200 {
+		var user *models.User
+		marshalErr := json.Unmarshal(data, &user)
+
+		if marshalErr != nil {
+			fmt.Println("error unmarshaling at update user", marshalErr)
+			http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+			return
+		}
+
+		payload.User = user
+
+		tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
+		fmt.Println("GET Update user payload", payload.User)
+		return
+	} else {
+		// handle error
+		fmt.Println(string(data))
+		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
+		return
+	}
+}
+
+func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	
+	_, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Redirect(res, req, "/users/"+ vars["id"], http.StatusSeeOther)
+		return
+	}
+
+	user, err := IsLoggedIn(req)
+	if err != nil {
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
+		return
+	}
+
+	fullname := req.FormValue("fullname")
+	email := req.FormValue("email")
+	password := req.FormValue("password")
+
+	updatedPassword, err := models.Hash(password)
+	if err != nil {
+		fmt.Println("error hashing the updated password", err)
+		http.Redirect(res, req, "/users/" + vars["id"], http.StatusSeeOther)
+		return
+	}
+
+	user.Fullname = fullname
+	user.Email = email
+	user.Password = string(updatedPassword)
+
+	payload := struct {
+		PageTitle string
+		User *models.User
+		ErrorMsg string
+		SuccessMsg string
+	}{
+		"Update User", user, "", "",
+	}
+
+	data, err := json.Marshal(user)
+	if err != nil {
+		fmt.Println("error marshalling at process update user", err)
+		payload.ErrorMsg = "An unexpected error has occured while updating user. Please try again."
+		tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
+		return
+	}
+
+	client := &http.Client{}
+
+	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/users/"+vars["id"], bytes.NewBuffer(data))
+	request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Authorization", "Bearer " + GetJWT(req))
+	
+	response, err := client.Do(req)
+	if err != nil {
+		fmt.Println("error sending process update user request", err)
+		payload.ErrorMsg = "An unexpected error has occured while updating user. Please try again."
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode == http.StatusOK {
+		http.Redirect(res, req, "/users/"+vars["id"], http.StatusFound)
+		return
+	} else {
+		respData, _ := ioutil.ReadAll(response.Body)
+		var errorResponse responses.ErrorResponse
+		json.Unmarshal(respData, &errorResponse)
+		payload.ErrorMsg = errorResponse.Error
+
+		if strings.Contains(payload.ErrorMsg, "Duplicate entry") {
+			payload.ErrorMsg = "There's already a user with the name provided. Please use a different name."
+		}
+	}
+
+	tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
+	fmt.Println("PUT Update user payload", payload.User)
 }
