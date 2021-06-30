@@ -40,7 +40,8 @@ func HandleRoutes(addr string) {
 
 	// Comment Handlers
 	router.HandleFunc("/business/{id}/comment", controllers.CreateComment).Methods("GET")
-	router.HandleFunc("/business/{id}/comment", controllers.CreateComment).Methods("POST")
+	router.HandleFunc("/business/{id}/comment", controllers.ProcessCommentForm).Methods("POST")
+	router.HandleFunc("/bussiness/{bID}/comment/{cID}", controllers.ViewComment).Methods("GET")
 
 	log.Printf("Starting server on port %s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, router))

@@ -60,6 +60,8 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 	newComment.BusinessID = uint32(bID)
 	newComment.Content = comment
 
+	payload.Comment = &newComment
+
 	data, err := json.Marshal(newComment)
 	if err != nil {
 		fmt.Println("error marshalling new comment", err)
@@ -85,9 +87,60 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 				return
 			}
 			fmt.Println("New comment created successfully")
-			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(newComment.BusinessID), 10), http.StatusFound)
+			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(newComment.BusinessID), 10), http.StatusSeeOther)
 			return
 		}
 	}
 	tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
+}
+
+func ViewComment(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	_, err := strconv.Atoi(vars["bID"])
+	if err != nil {
+		// Redirect to Index Page
+		http.Redirect(res, req, "/", http.StatusNotFound)
+		return
+	}
+	_, err = strconv.Atoi(vars["cID"])
+	if err != nil {
+		// Redirect to Index Page
+		http.Redirect(res, req, "/", http.StatusNotFound)
+		return
+	}
+	payload := struct {
+		PageTitle  string
+		Comment    *models.Comment
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"View Business", nil, "", "",
+	}
+	var comment models.Comment
+
+	payload.Comment = &comment
+
+	client := &http.Client{}
+	request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println("Comment retrieval failed, error sending http request")
+	} else {
+		resBody, _ := ioutil.ReadAll(response.Body)
+
+		if response.StatusCode == 201 {
+			marshalErr := json.Unmarshal(resBody, &comment)
+			if marshalErr != nil {
+				payload.ErrorMsg = "An unexpected error has occured while showing business. Please try again."
+				http.Redirect(res, req, "/business/"+vars["bID"], http.StatusSeeOther)
+				return
+			}
+			fmt.Println("New comment created successfully")
+
+			tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
+			return
+		}
+	}
 }
