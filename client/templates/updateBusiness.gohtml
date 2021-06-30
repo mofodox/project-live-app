@@ -7,9 +7,9 @@
         <div class="container">
             {{template "nav" .}}
 
-            <h1>Update Business - {{ .Business.Name }}</h1>
-
             <hr/>
+
+            <h1 class="mb-4">Update Business - {{ .Business.Name }}</h1>
 
             {{ if .ErrorMsg }}
             <div class="alert alert-danger" role="alert">

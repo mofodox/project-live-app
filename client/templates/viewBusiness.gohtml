@@ -7,9 +7,9 @@
         <div class="container">
             {{template "nav" .}}
 
-            <h1>{{ .Business.Name }}</h1>
-
             <hr/>
+
+            <h1 class="mb-4">{{ .Business.Name }}</h1>
 
             <div>
                 {{ if .Business.Description }}
@@ -96,7 +96,7 @@
             {{ end }}
 
             <hr/>
-            
+
             <div>
                 <a href="/business/{{ .Business.ID }}/comment">Add New Comment</a>
             </div>

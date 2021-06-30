@@ -9,6 +9,8 @@
 
             <hr/>
 
+            <h1 class="mb-4">Businesses</h1>
+
             {{ if gt (len .Businesses) 0 }}
                 {{ range $key, $val := .Businesses }}
                     <a class="business-item" href="/business/{{ $val.ID }}">

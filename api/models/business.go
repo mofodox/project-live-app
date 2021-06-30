@@ -3,10 +3,12 @@ package models
 import (
 	"context"
 	"errors"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/microcosm-cc/bluemonday"
 	"googlemaps.github.io/maps"
 )
 
@@ -48,7 +50,45 @@ func (business *Business) Validate() error {
 		return errors.New("enter a business description that has at least 20 characters")
 	}
 
+	if len(business.Website) > 0 {
+		_, err := url.ParseRequestURI(business.Website)
+		if err != nil {
+			return errors.New("enter a valid website url")
+		}
+	}
+
+	if len(business.Instagram) > 0 {
+		_, err := url.ParseRequestURI(business.Instagram)
+		if err != nil {
+			return errors.New("enter a valid instagram url")
+		}
+	}
+
+	if len(business.Facebook) > 0 {
+		_, err := url.ParseRequestURI(business.Facebook)
+		if err != nil {
+			return errors.New("enter a valid facebook url")
+		}
+	}
+
 	return nil
+}
+
+func (business *Business) Sanitize() {
+
+	// Policy to disallow and strip all tags - Similar to GO's unexported striptags
+	p := bluemonday.StrictPolicy()
+
+	business.Name = p.Sanitize(business.Name)
+	business.ShortDescription = p.Sanitize(business.ShortDescription)
+	business.Description = p.Sanitize(business.Description)
+	business.Address = p.Sanitize(business.Address)
+	business.UnitNo = p.Sanitize(business.UnitNo)
+	business.Zipcode = p.Sanitize(business.Zipcode)
+
+	business.Website = p.Sanitize(business.Website)
+	business.Instagram = p.Sanitize(business.Instagram)
+	business.Facebook = p.Sanitize(business.Facebook)
 }
 
 // https://pkg.go.dev/googlemaps.github.io/maps?utm_source=godoc

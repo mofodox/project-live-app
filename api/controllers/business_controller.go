@@ -34,9 +34,8 @@ func (server *Server) CreateBusiness(res http.ResponseWriter, req *http.Request)
 			// convert JSON to object
 			json.Unmarshal(reqBody, &newBusiness)
 
-			// todo: sanitization
-
-			// validation
+			// sanitization & validation
+			newBusiness.Sanitize()
 			err := newBusiness.Validate()
 
 			if err != nil {
@@ -145,9 +144,8 @@ func (server *Server) UpdateBusiness(res http.ResponseWriter, req *http.Request)
 			// convert JSON to object
 			json.Unmarshal(reqBody, &updatedBusiness)
 
-			// todo: sanitization
-
-			// validation
+			// sanitization & validation
+			updatedBusiness.Sanitize()
 			err := updatedBusiness.Validate()
 
 			if err != nil {
