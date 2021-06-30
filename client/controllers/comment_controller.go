@@ -158,7 +158,7 @@ func UpdateComment(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func ProcessUpdateForm(res http.ResponseWriter, req *http.Request) {
+func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["cID"])
 	if err != nil {
