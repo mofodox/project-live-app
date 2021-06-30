@@ -166,6 +166,7 @@ func (server *Server) RemoveComments(res http.ResponseWriter, req *http.Request)
 			if err != nil {
 				responses.ERROR(res, http.StatusInternalServerError, err)
 			}
+			responses.JSON(res, http.StatusOK, "Deleted successfully")
 		} else {
 			responses.ERROR(res, http.StatusUnauthorized, errors.New("no authorization"))
 		}

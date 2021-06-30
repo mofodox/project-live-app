@@ -6,6 +6,10 @@
     <body>
         <div class="container">
 
+            <h1>View Comment</h1>
+
+            <hr/>
+
             <div>
                 {{ if .Comment }}
                 <div class="mb-3">
@@ -15,11 +19,13 @@
                     <div class="create-date">Written on: {{ .Comment.CreatedAt }}</div>
                     <div class="create-date">Last edited on: {{ .Comment.UpdatedAt }}</div>
                 </div>
+                {{ end }}
             </div>
 
             <div class="mt-3">
-                <a href="/category/update/{{ .Category.ID }}">Edit Category</a>
+                <a href="/comment/{{ .Comment.CommentID }}/delete">Delete Comment</a>
             </div>
+
 
             {{template "footer"}}
         </div>

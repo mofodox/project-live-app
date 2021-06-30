@@ -114,7 +114,7 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 		ErrorMsg   string
 		SuccessMsg string
 	}{
-		"View Business", nil, "", "",
+		"View Comment", nil, "", "",
 	}
 	var comment models.Comment
 
@@ -138,9 +138,46 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 				return
 			}
 			fmt.Println("New comment created successfully")
-
 			tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
 			return
+		}
+	}
+	tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
+}
+
+func UpdateComment(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	_, err := strconv.Atoi(vars["cID"])
+	if err != nil {
+		// Redirect to Index Page
+		http.Redirect(res, req, "/", http.StatusNotFound)
+		return
+	}
+
+	var comment *models.Comment
+	content := req.FormValue("content")
+	comment.Content = content
+
+}
+
+func DeleteComment(res http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	_, err := strconv.Atoi(vars["cID"])
+	if err != nil {
+		http.Redirect(res, req, "/", http.StatusNotFound)
+		return
+	}
+	client := &http.Client{}
+	request, _ := http.NewRequest(http.MethodDelete, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println("Comment deletion failed, error sending http request")
+	} else {
+		if response.StatusCode == 200 {
+			fmt.Println("Comment deleted successfully")
+			http.Redirect(res, req, "/", http.StatusSeeOther)
 		}
 	}
 }
