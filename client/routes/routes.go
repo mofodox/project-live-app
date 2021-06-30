@@ -20,7 +20,9 @@ func HandleRoutes(addr string) {
 	router.HandleFunc("/register", controllers.Register).Methods("POST", "GET")
 	router.HandleFunc("/login", controllers.Login).Methods("POST", "GET")
 	router.HandleFunc("/logout", controllers.Logout).Methods("GET")
-	router.HandleFunc("/users/{id}", controllers.GetProfile).Methods("GET")
+	router.HandleFunc("/users/edit/{id}", controllers.UpdateProfile).Methods("GET")
+	router.HandleFunc("/users/edit/{id}", controllers.ProcessUpdateProfile).Methods("PUT")
+	router.HandleFunc("/users/{id}", controllers.ShowProfile).Methods("GET")
 
 	// Business Handlers
 	router.HandleFunc("/business", controllers.ListBusiness).Methods("GET")
