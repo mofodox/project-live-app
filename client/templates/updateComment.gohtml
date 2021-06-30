@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        {{template "header" .}}
+    </head>
+    <body>
+        <div class="container">
+
+            <h1>Update Comment </h1>
+
+            <hr/>
+
+            <form method="post">
+                <div class="form-group mb-3">
+                    <label for="comment" class="form-label">Edit Comment</label>
+                    <input class="form-control" type="text" name="comment" placeholder="Edit Comment">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-purple mb-3">Submit</button>
+            </form>
+
+            {{template "footer"}}
+        </div>
+    </body>
+</html>

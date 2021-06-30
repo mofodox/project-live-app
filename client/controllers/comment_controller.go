@@ -146,6 +146,19 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 }
 
 func UpdateComment(res http.ResponseWriter, req *http.Request) {
+	payload := struct {
+		PageTitle  string
+		Comment    *models.Comment
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"Edit Comment", nil, "", "",
+	}
+	tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
+
+}
+
+func ProcessUpdateForm(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["cID"])
 	if err != nil {
@@ -153,11 +166,42 @@ func UpdateComment(res http.ResponseWriter, req *http.Request) {
 		http.Redirect(res, req, "/", http.StatusNotFound)
 		return
 	}
-
-	var comment *models.Comment
+	payload := struct {
+		PageTitle  string
+		Comment    *models.Comment
+		ErrorMsg   string
+		SuccessMsg string
+	}{
+		"Edit Comment", nil, "", "",
+	}
+	var comment models.Comment
 	content := req.FormValue("content")
 	comment.Content = content
 
+	payload.Comment = &comment
+
+	client := &http.Client{}
+	request, _ := http.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
+	request.Header.Set("Content-Type", "application/json")
+
+	response, err := client.Do(request)
+	if err != nil {
+		fmt.Println("")
+	} else {
+		resBody, _ := ioutil.ReadAll(response.Body)
+
+		if response.StatusCode == 200 {
+			marshalErr := json.Unmarshal(resBody, &comment)
+
+			if marshalErr != nil {
+				fmt.Println("An unexpected error has occured while editing comment.")
+				tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
+			}
+			fmt.Println("New comment created successfully")
+			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(comment.BusinessID), 10), http.StatusOK)
+		}
+	}
+	tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 }
 
 func DeleteComment(res http.ResponseWriter, req *http.Request) {
