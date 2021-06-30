@@ -143,6 +143,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 					Name:    "jwt-token",
 					Value:   tokenString,
 					Expires: time.Now().Add(time.Hour * 1),
+					HttpOnly: true,
 				}
 
 				http.SetCookie(res, cookie)
@@ -231,10 +232,11 @@ func Login(res http.ResponseWriter, req *http.Request) {
 				Name:    "jwt-token",
 				Value:   tokenString,
 				Expires: time.Now().Add(time.Hour * 1),
+				HttpOnly: true,
 			}
 
 			http.SetCookie(res, cookie)
-			http.Redirect(res, req, "/", http.StatusFound)
+			http.Redirect(res, req, "/businesses", http.StatusSeeOther)
 			return
 		}
 
