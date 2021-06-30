@@ -1,5 +1,7 @@
 # project-live-app
 
+![LOGO](https://user-images.githubusercontent.com/1651333/123939585-da0f7780-d9ca-11eb-8985-247d4fa96ed5.png)
+
 This is a project for our GoSchool Project Live Batch 4.
 
 ## File structure
