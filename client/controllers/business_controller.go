@@ -77,8 +77,14 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// query
+	// hackish way to incorporate location search for now...
 	if q != "" {
-		addtionalQuerystring += "&q=" + q
+		if strings.Contains(strings.ToLower(q), "location:") {
+			q = strings.ReplaceAll(strings.ToLower(q), "location:", "")
+			addtionalQuerystring += "&location=" + q
+		} else {
+			addtionalQuerystring += "&q=" + q
+		}
 	}
 
 	client := &http.Client{}

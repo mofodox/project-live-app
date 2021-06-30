@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -262,7 +261,6 @@ func (server *Server) SearchBusinesses(res http.ResponseWriter, req *http.Reques
 		}
 
 		if lat != 0 && lng != 0 {
-			fmt.Println(lat, lng, "location data of:", location)
 			result = result.Select("*, (((acos(sin((?*pi()/180)) * sin((`lat`*pi()/180)) + cos((?*pi()/180)) * cos((`lat`*pi()/180)) * cos(((?-`lng`) * pi()/180)))) * 180/pi()) * 60 * 1.1515 * 1.609344) as distance", lat, lat, lng)
 			result = result.Having("distance <= ?", BusinessLocationRadius)
 			countResult = countResult.Where("(((acos(sin((?*pi()/180)) * sin((`lat`*pi()/180)) + cos((?*pi()/180)) * cos((`lat`*pi()/180)) * cos(((?-`lng`) * pi()/180)))) * 180/pi()) * 60 * 1.1515 * 1.609344) <= ?", lat, lat, lng, BusinessLocationRadius)
