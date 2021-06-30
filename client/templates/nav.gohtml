@@ -19,6 +19,8 @@
                 </form>
             </div>
 
+            <a class="btn btn-primary btn-purple me-2" href="/business" role="button">Browse Businesses</a>
+
             {{ if .User }}
                 <a class="btn btn-primary btn-purple me-2" href="/business/create" role="button">Add Business</a>
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
@@ -35,7 +37,6 @@
                 {{/* <a class="btn btn-primary btn-purple" href="/logout" role="button">Logout</a>
                 <p></p> */}}
             {{ else }}
-                <a class="btn btn-primary btn-purple me-2" href="/business" role="button">Browse Businesses</a>
                 <a class="btn btn-primary btn-purple me-2" href="/register" role="button">Register</a>
                 <a class="btn btn-primary btn-purple" href="/login" role="button">Login</a>
             {{ end }}
