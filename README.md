@@ -1,6 +1,6 @@
 # project-live-app
 
-![LOGO](https://user-images.githubusercontent.com/1651333/123939585-da0f7780-d9ca-11eb-8985-247d4fa96ed5.png)
+![LOGO](https://user-images.githubusercontent.com/1651333/123939855-2bb80200-d9cb-11eb-9958-09ba07203fa9.png)
 
 This is a project for our GoSchool Project Live Batch 4.
 
