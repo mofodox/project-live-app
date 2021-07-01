@@ -14,14 +14,12 @@ import (
 )
 
 func CreateComment(res http.ResponseWriter, req *http.Request) {
-	/*
-		// Check User
-		_, err := IsLoggedIn(req)
-		if err != nil {
-			http.Redirect(res, req, "/login", http.StatusSeeOther)
-			return
-		}
-	*/
+	// Check User
+	_, err := lib.IsLoggedIn(req)
+	if err != nil {
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
+		return
+	}
 
 	payload := struct {
 		PageTitle string
@@ -37,13 +35,12 @@ func CreateComment(res http.ResponseWriter, req *http.Request) {
 }
 
 func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
-	/*
-		_, err := IsLoggedIn(req)
-		if err != nil {
-			http.Redirect(res, req, "/login", http.StatusSeeOther)
-			return
-		}
-	*/
+
+	_, err := lib.IsLoggedIn(req)
+	if err != nil {
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
+		return
+	}
 
 	vars := mux.Vars(req)
 	bID, err := strconv.Atoi(vars["id"])
@@ -156,14 +153,12 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 }
 
 func UpdateComment(res http.ResponseWriter, req *http.Request) {
-	/*
-		// Check User
-		_, err := IsLoggedIn(req)
-		if err != nil {
-			http.Redirect(res, req, "/login", http.StatusSeeOther)
-			return
-		}
-	*/
+	// Check User
+	_, err := lib.IsLoggedIn(req)
+	if err != nil {
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
+		return
+	}
 
 	payload := struct {
 		PageTitle  string
@@ -178,17 +173,16 @@ func UpdateComment(res http.ResponseWriter, req *http.Request) {
 }
 
 func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
-	/*
-		// Check User
-		_, err := IsLoggedIn(req)
-		if err != nil {
-			http.Redirect(res, req, "/login", http.StatusSeeOther)
-			return
-		}
-	*/
+
+	// Check User
+	_, err := lib.IsLoggedIn(req)
+	if err != nil {
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
+		return
+	}
 
 	vars := mux.Vars(req)
-	_, err := strconv.Atoi(vars["cID"])
+	_, err = strconv.Atoi(vars["cID"])
 	if err != nil {
 		// Redirect to Index Page
 		http.Redirect(res, req, "/", http.StatusNotFound)
@@ -247,16 +241,16 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 }
 
 func DeleteComment(res http.ResponseWriter, req *http.Request) {
-	/*
-		// Check User
-		_, err := IsLoggedIn(req)
-		if err != nil {
-			http.Redirect(res, req, "/login", http.StatusSeeOther)
-			return
-		} */
+
+	// Check User
+	_, err := lib.IsLoggedIn(req)
+	if err != nil {
+		http.Redirect(res, req, "/login", http.StatusSeeOther)
+		return
+	}
 
 	vars := mux.Vars(req)
-	_, err := strconv.Atoi(vars["cID"])
+	_, err = strconv.Atoi(vars["cID"])
 	if err != nil {
 		http.Redirect(res, req, "/", http.StatusNotFound)
 		return
