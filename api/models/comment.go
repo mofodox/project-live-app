@@ -2,6 +2,8 @@ package models
 
 import (
 	"time"
+
+	"github.com/microcosm-cc/bluemonday"
 )
 
 type Comment struct {
@@ -12,4 +14,10 @@ type Comment struct {
 	Content    string    `gorm:"size:255" json:"content"`
 	CreatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"created_at"`
 	UpdatedAt  time.Time `gorm:"default:CURRENT_TIMESTAMP" json:"updated_at"`
+}
+
+func (comment *Comment) Sanitize() {
+	// Policy to disallow and strip all tags - Similar to GO's unexported striptags
+	p := bluemonday.StrictPolicy()
+	comment.Content = p.Sanitize(comment.Content)
 }

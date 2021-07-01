@@ -28,10 +28,14 @@ func (server *Server) AddComment(res http.ResponseWriter, req *http.Request) {
 				responses.ERROR(res, http.StatusInternalServerError, err)
 				return
 			}
+
+			// Sanitization and Validation
+			newComment.Sanitize()
 			if newComment.BusinessID == 0 || (newComment.Content == "" /* || reivew == 0 */) {
 				responses.ERROR(res, http.StatusBadRequest, errors.New("not enough"+
 					" information provided"))
 			}
+
 			newComment.UserID = userID
 			newComment.CreatedAt = time.Now()
 			newComment.UpdatedAt = time.Now()
@@ -54,7 +58,7 @@ func (server *Server) BusinessComments(res http.ResponseWriter, req *http.Reques
 			responses.ERROR(res, http.StatusInternalServerError, err)
 			return
 		}
-		// Might chance to linked list later
+		// Might change to linked list later
 		bComments := []models.Comment{}
 		err = server.DB.Where("business_id = ?", business_ID).Find(&bComments).Error
 		if err != nil {
@@ -72,7 +76,7 @@ func (server *Server) UserComments(res http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			responses.ERROR(res, http.StatusInternalServerError, err)
 		}
-		// Might chance to linked list later
+		// Might change to linked list later
 		uComments := []models.Comment{}
 		err = server.DB.Where("user_id = ?", user_ID).Find(&uComments).Error
 		if err != nil {
@@ -129,7 +133,11 @@ func (server *Server) EditComments(res http.ResponseWriter, req *http.Request) {
 					responses.JSON(res, http.StatusNotModified, currentComment)
 					return
 				}
+
+				// Sanitization and Validation
+				currentComment.Sanitize()
 				currentComment.Content = updateComment.Content
+
 				currentComment.UpdatedAt = time.Now()
 				err = server.DB.Save(&currentComment).Error
 				if err != nil {

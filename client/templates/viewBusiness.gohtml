@@ -9,6 +9,12 @@
 
             <hr/>
 
+            {{ if .ErrorMsg }}
+            <div class="alert alert-danger" role="alert">
+                {{ ucFirst .ErrorMsg }}
+            </div>
+            {{ end }}
+
             <h1 class="mb-4">{{ .Business.Name }}</h1>
 
             <div>

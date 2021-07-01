@@ -15,20 +15,20 @@ import (
 
 func CreateComment(res http.ResponseWriter, req *http.Request) {
 	// Check User
-	_, err := lib.IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
 	}
 
 	payload := struct {
-		PageTitle string
-		//User       *models.User
+		PageTitle  string
+		User       *models.User
 		Comment    *models.Comment
 		ErrorMsg   string
 		SuccessMsg string
 	}{
-		"New Comment" /*user,*/, nil, "", "",
+		"New Comment", user, nil, "", "",
 	}
 
 	lib.Tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
@@ -75,7 +75,7 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 	reqBody := bytes.NewBuffer(data)
 
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/comment/", reqBody)
+	request, _ := http.NewRequest(http.MethodPost, lib.ApiBaseURL+"/comment/", reqBody)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 
@@ -128,7 +128,7 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 	payload.Comment = &comment
 
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodGet, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
+	request, _ := http.NewRequest(http.MethodGet, lib.ApiBaseURL+"/comment/"+vars["cID"], nil)
 	request.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(request)
@@ -154,7 +154,7 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 
 func UpdateComment(res http.ResponseWriter, req *http.Request) {
 	// Check User
-	_, err := lib.IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
@@ -162,11 +162,12 @@ func UpdateComment(res http.ResponseWriter, req *http.Request) {
 
 	payload := struct {
 		PageTitle  string
+		User       *models.User
 		Comment    *models.Comment
 		ErrorMsg   string
 		SuccessMsg string
 	}{
-		"Edit Comment", nil, "", "",
+		"Edit Comment", user, nil, "", "",
 	}
 	lib.Tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 
@@ -215,7 +216,7 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 	reqBody := bytes.NewBuffer(data)
 
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/comment/"+vars["cID"], reqBody)
+	request, _ := http.NewRequest(http.MethodPut, lib.ApiBaseURL+"/comment/"+vars["cID"], reqBody)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 
@@ -261,7 +262,7 @@ func DeleteComment(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodDelete, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
+	request, _ := http.NewRequest(http.MethodDelete, lib.ApiBaseURL+"/comment/"+vars["cID"], nil)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 

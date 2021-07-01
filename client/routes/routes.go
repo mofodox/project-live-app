@@ -41,12 +41,12 @@ func HandleRoutes(addr string) {
 	router.HandleFunc("/category/{id:[0-9]+}", controllers.ViewCategory).Methods("GET")
 
 	// Comment Handlers
-	router.HandleFunc("/business/{id}/comment", controllers.CreateComment).Methods("GET")
-	router.HandleFunc("/business/{id}/comment", controllers.ProcessCommentForm).Methods("POST")
-	router.HandleFunc("/business/{bID}/comment/{cID}", controllers.ViewComment).Methods("GET")
-	router.HandleFunc("/business/{bID}/comment/{cID}/edit", controllers.UpdateComment).Methods("GET")
-	router.HandleFunc("/business/{bID}/comment/{cID}/edit", controllers.ProcessUpdateComment).Methods("POST")
-	router.HandleFunc("/business/{bID}/comment/{cID}/delete", controllers.DeleteComment).Methods("GET")
+	router.HandleFunc("/business/{id:[0-9]+}/comment", controllers.CreateComment).Methods("GET")
+	router.HandleFunc("/business/{id:[0-9]+}/comment", controllers.ProcessCommentForm).Methods("POST")
+	router.HandleFunc("/business/{bID:[0-9]+}/comment/{cID:[0-9]+}", controllers.ViewComment).Methods("GET")
+	router.HandleFunc("/business/{bID:[0-9]+}/comment/{cID:[0-9]+}/edit", controllers.UpdateComment).Methods("GET")
+	router.HandleFunc("/business/{bID:[0-9]+}/comment/{cID:[0-9]+}/edit", controllers.ProcessUpdateComment).Methods("POST")
+	router.HandleFunc("/business/{bID:[0-9]+}/comment/{cID:[0-9]+}/delete", controllers.DeleteComment).Methods("GET")
 
 	log.Printf("Starting server on port %s\n", addr)
 	log.Fatal(http.ListenAndServe(addr, router))
