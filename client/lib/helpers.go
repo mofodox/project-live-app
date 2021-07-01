@@ -76,7 +76,7 @@ func IsLoggedIn(req *http.Request) (*models.User, error) {
 
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodGet, ApiBaseURL+"/users/"+strconv.FormatUint(uint64(userID), 10), nil)
-	//request.Header.Set("Content-Type", "application/json")
+	request.Header.Set("Content-Type", "application/json")
 	response, err := client.Do(request)
 
 	// handle error
