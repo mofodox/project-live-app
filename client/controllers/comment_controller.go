@@ -71,6 +71,9 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 	data, err := json.Marshal(newComment)
 	if err != nil {
 		fmt.Println("error marshalling new comment", err)
+		payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
+		lib.Tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
+		return
 	}
 	reqBody := bytes.NewBuffer(data)
 
@@ -89,6 +92,7 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 		if response.StatusCode == 201 {
 			marshalErr := json.Unmarshal(resBody, &newComment)
 			if marshalErr != nil {
+				fmt.Println("Error unmarshalling comment")
 				payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
 				lib.Tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
 				return
@@ -212,6 +216,8 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 	data, err := json.Marshal(comment)
 	if err != nil {
 		fmt.Println("error marshalling new comment", err)
+		payload.ErrorMsg = "An unexpected error has occured while editing comment. Please try again."
+		lib.Tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 	}
 	reqBody := bytes.NewBuffer(data)
 
@@ -222,8 +228,9 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 
 	response, err := client.Do(request)
 	if err != nil {
-		fmt.Println("")
-		http.Redirect(res, req, "/business/"+vars["bID"], http.StatusSeeOther)
+		fmt.Println("Error sending http request")
+		payload.ErrorMsg = "An unexpected error has occured while editing comment. Please try again."
+		lib.Tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 	} else {
 		resBody, _ := ioutil.ReadAll(response.Body)
 

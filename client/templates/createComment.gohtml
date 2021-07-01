@@ -7,10 +7,16 @@
         <div class="container">
             {{template "nav" .}}
 
-
             <h1>Add Comment</h1>
 
             <hr/>
+
+             {{ if .ErrorMsg }}
+            <div class="alert alert-danger" role="alert">
+                {{ ucFirst .ErrorMsg }}
+            </div>
+            <hr/>
+            {{ end }}
 
             <form method="post">
 
