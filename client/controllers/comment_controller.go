@@ -13,13 +13,14 @@ import (
 )
 
 func CreateComment(res http.ResponseWriter, req *http.Request) {
-	// Get User
-	/*user, err := IsLoggedIn(req)
-
-	if err != nil {
-		http.Redirect(res, req, "/login", http.StatusSeeOther)
-		return
-	} */
+	/*
+		// Check User
+		_, err := IsLoggedIn(req)
+		if err != nil {
+			http.Redirect(res, req, "/login", http.StatusSeeOther)
+			return
+		}
+	*/
 
 	payload := struct {
 		PageTitle string
@@ -35,6 +36,13 @@ func CreateComment(res http.ResponseWriter, req *http.Request) {
 }
 
 func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
+	/*
+		_, err := IsLoggedIn(req)
+		if err != nil {
+			http.Redirect(res, req, "/login", http.StatusSeeOther)
+			return
+		}
+	*/
 
 	vars := mux.Vars(req)
 	bID, err := strconv.Atoi(vars["id"])
@@ -138,7 +146,6 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 				http.Redirect(res, req, "/business/"+vars["bID"], http.StatusSeeOther)
 				return
 			}
-			fmt.Println("New comment created successfully")
 			tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
 			return
 		}
@@ -147,6 +154,15 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 }
 
 func UpdateComment(res http.ResponseWriter, req *http.Request) {
+	/*
+		// Check User
+		_, err := IsLoggedIn(req)
+		if err != nil {
+			http.Redirect(res, req, "/login", http.StatusSeeOther)
+			return
+		}
+	*/
+
 	payload := struct {
 		PageTitle  string
 		Comment    *models.Comment
@@ -160,6 +176,15 @@ func UpdateComment(res http.ResponseWriter, req *http.Request) {
 }
 
 func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
+	/*
+		// Check User
+		_, err := IsLoggedIn(req)
+		if err != nil {
+			http.Redirect(res, req, "/login", http.StatusSeeOther)
+			return
+		}
+	*/
+
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["cID"])
 	if err != nil {
@@ -187,8 +212,14 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 
 	payload.Comment = &comment
 
+	data, err := json.Marshal(comment)
+	if err != nil {
+		fmt.Println("error marshalling new comment", err)
+	}
+	reqBody := bytes.NewBuffer(data)
+
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
+	request, _ := http.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/comment/"+vars["cID"], reqBody)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
 
@@ -206,14 +237,22 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 				fmt.Println("An unexpected error has occured while editing comment.")
 				tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 			}
-			fmt.Println("New comment created successfully")
-			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(comment.BusinessID), 10), http.StatusOK)
+			fmt.Println("Comment edited successfully")
+			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(comment.BusinessID), 10), http.StatusSeeOther)
 		}
 	}
 	tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 }
 
 func DeleteComment(res http.ResponseWriter, req *http.Request) {
+	/*
+		// Check User
+		_, err := IsLoggedIn(req)
+		if err != nil {
+			http.Redirect(res, req, "/login", http.StatusSeeOther)
+			return
+		} */
+
 	vars := mux.Vars(req)
 	_, err := strconv.Atoi(vars["cID"])
 	if err != nil {
