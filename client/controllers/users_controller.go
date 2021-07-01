@@ -13,68 +13,15 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
+	"github.com/mofodox/project-live-app/client/lib"
 )
-
-func IsLoggedIn(req *http.Request) (*models.User, error) {
-	myCookie, err := req.Cookie("jwt-token")
-	if err != nil {
-		return nil, err
-	}
-
-	token := myCookie.Value
-
-	userID, err := auth.GetTokenID(token)
-	if err != nil {
-		return nil, err
-	}
-
-	// Todo: add cookie check and send JWT with request
-	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+strconv.FormatUint(uint64(userID), 10), nil)
-	request.Header.Set("Content-Type", "application/json")
-	response, err := client.Do(request)
-
-	// handle error
-	if err != nil {
-		fmt.Println("error sending get user info request", err)
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	data, _ := ioutil.ReadAll(response.Body)
-
-	// success
-	if response.StatusCode == 200 {
-		var user *models.User
-		marshalErr := json.Unmarshal(data, &user)
-
-		if marshalErr != nil {
-			return nil, marshalErr
-		}
-
-		return user, nil
-	}
-
-	return nil, errors.New("unable to fetch user")
-}
-
-func GetJWT(req *http.Request) string {
-
-	myCookie, err := req.Cookie("jwt-token")
-	if err == nil {
-		return myCookie.Value
-	}
-
-	return ""
-}
 
 func Register(res http.ResponseWriter, req *http.Request) {
 
 	// Get User
-	_, err := IsLoggedIn(req)
+	_, err := lib.IsLoggedIn(req)
 
 	if err == nil {
 		// already logged in
@@ -108,7 +55,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 
 		responseBuffer := bytes.NewBuffer(data)
 
-		req, err = http.NewRequest(http.MethodPost, apiBaseURL+"/users", responseBuffer)
+		req, err = http.NewRequest(http.MethodPost, lib.ApiBaseURL+"/users", responseBuffer)
 		if err != nil {
 			log.Fatalf("error response occurred %v\n", err)
 		}
@@ -141,9 +88,9 @@ func Register(res http.ResponseWriter, req *http.Request) {
 
 			if err == nil {
 				cookie := &http.Cookie{
-					Name:    "jwt-token",
-					Value:   tokenString,
-					Expires: time.Now().Add(time.Hour * 1),
+					Name:     "jwt-token",
+					Value:    tokenString,
+					Expires:  time.Now().Add(time.Hour * 1),
 					HttpOnly: true,
 				}
 
@@ -165,7 +112,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	tpl.ExecuteTemplate(res, "register.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "register.gohtml", payload)
 }
 
 func sendLoginRequest(email string, password string) (string, error) {
@@ -182,7 +129,7 @@ func sendLoginRequest(email string, password string) (string, error) {
 
 	responseBuffer := bytes.NewBuffer(data)
 
-	req, err := http.NewRequest(http.MethodPost, apiBaseURL+"/users/login", responseBuffer)
+	req, err := http.NewRequest(http.MethodPost, lib.ApiBaseURL+"/users/login", responseBuffer)
 	if err != nil {
 		log.Fatalf("error response occured %v\n", err)
 	}
@@ -230,9 +177,9 @@ func Login(res http.ResponseWriter, req *http.Request) {
 
 		if err == nil {
 			cookie := &http.Cookie{
-				Name:    "jwt-token",
-				Value:   tokenString,
-				Expires: time.Now().Add(time.Hour * 1),
+				Name:     "jwt-token",
+				Value:    tokenString,
+				Expires:  time.Now().Add(time.Hour * 1),
 				HttpOnly: true,
 			}
 
@@ -244,7 +191,7 @@ func Login(res http.ResponseWriter, req *http.Request) {
 		payload.ErrorMsg = err.Error()
 	}
 
-	tpl.ExecuteTemplate(res, "login.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "login.gohtml", payload)
 }
 
 func Logout(res http.ResponseWriter, req *http.Request) {
@@ -267,7 +214,7 @@ func ShowProfile(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
@@ -284,11 +231,11 @@ func ShowProfile(res http.ResponseWriter, req *http.Request) {
 	}
 
 	client := &http.Client{}
-	
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+vars["id"], nil)
+
+	request, _ := http.NewRequest(http.MethodGet, lib.ApiBaseURL+"/users/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 
-	response, err:= client.Do(request)
+	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("error sending get user request", err)
 		http.Redirect(res, req, "/business", http.StatusTemporaryRedirect)
@@ -310,7 +257,7 @@ func ShowProfile(res http.ResponseWriter, req *http.Request) {
 
 		payload.User = user
 
-		tpl.ExecuteTemplate(res, "viewProfile.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "viewProfile.gohtml", payload)
 		fmt.Println("GET View Profile payload", payload.User)
 		return
 	} else {
@@ -330,7 +277,7 @@ func UpdateProfile(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
@@ -349,7 +296,7 @@ func UpdateProfile(res http.ResponseWriter, req *http.Request) {
 
 	client := &http.Client{}
 
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+vars["id"], nil)
+	request, _ := http.NewRequest(http.MethodGet, lib.ApiBaseURL+"/users/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 	response, err := client.Do(request)
 
@@ -375,7 +322,7 @@ func UpdateProfile(res http.ResponseWriter, req *http.Request) {
 
 		payload.User = user
 
-		tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
 		fmt.Println("GET Update user payload", payload.User)
 		return
 	} else {
@@ -388,14 +335,14 @@ func UpdateProfile(res http.ResponseWriter, req *http.Request) {
 
 func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	
+
 	_, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Redirect(res, req, "/users/"+ vars["id"], http.StatusSeeOther)
+		http.Redirect(res, req, "/users/"+vars["id"], http.StatusSeeOther)
 		return
 	}
 
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
@@ -410,9 +357,9 @@ func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 	user.Password = password
 
 	payload := struct {
-		PageTitle string
-		User *models.User
-		ErrorMsg string
+		PageTitle  string
+		User       *models.User
+		ErrorMsg   string
 		SuccessMsg string
 	}{
 		"Update User", user, "", "",
@@ -422,16 +369,16 @@ func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("error marshalling at process update user", err)
 		payload.ErrorMsg = "An unexpected error has occured while updating user. Please try again."
-		tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
 		return
 	}
 
 	client := &http.Client{}
 
-	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/users/"+vars["id"], bytes.NewBuffer(data))
+	request, _ := http.NewRequest(http.MethodPut, lib.ApiBaseURL+"/users/"+vars["id"], bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer " + GetJWT(req))
-	
+	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
+
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("error sending process update user request", err)
@@ -453,6 +400,6 @@ func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
 	fmt.Println("PUT Update user payload", payload.User)
 }

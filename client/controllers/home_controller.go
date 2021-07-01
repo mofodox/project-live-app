@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/mofodox/project-live-app/api/models"
+	"github.com/mofodox/project-live-app/client/lib"
 )
 
 func Home(res http.ResponseWriter, req *http.Request) {
@@ -19,11 +20,11 @@ func Home(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Get User
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 
 	if err == nil {
 		payload.User = user
 	}
 
-	tpl.ExecuteTemplate(res, "index.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "index.gohtml", payload)
 }

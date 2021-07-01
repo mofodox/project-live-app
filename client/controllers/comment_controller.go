@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/mofodox/project-live-app/api/models"
+	"github.com/mofodox/project-live-app/client/lib"
 )
 
 func CreateComment(res http.ResponseWriter, req *http.Request) {
@@ -32,7 +33,7 @@ func CreateComment(res http.ResponseWriter, req *http.Request) {
 		"New Comment" /*user,*/, nil, "", "",
 	}
 
-	tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
 }
 
 func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
@@ -79,7 +80,7 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPost, "http://localhost:8080/api/v1/comment/", reqBody)
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
+	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 
 	response, err := client.Do(request)
 	if err != nil {
@@ -92,7 +93,7 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 			marshalErr := json.Unmarshal(resBody, &newComment)
 			if marshalErr != nil {
 				payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
-				tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
+				lib.Tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
 				return
 			}
 			fmt.Println("New comment created successfully")
@@ -100,7 +101,7 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
-	tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
 }
 
 func ViewComment(res http.ResponseWriter, req *http.Request) {
@@ -146,11 +147,12 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 				http.Redirect(res, req, "/business/"+vars["bID"], http.StatusSeeOther)
 				return
 			}
-			tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
+			fmt.Println("New comment created successfully")
+			lib.Tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
 			return
 		}
 	}
-	tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
 }
 
 func UpdateComment(res http.ResponseWriter, req *http.Request) {
@@ -171,7 +173,7 @@ func UpdateComment(res http.ResponseWriter, req *http.Request) {
 	}{
 		"Edit Comment", nil, "", "",
 	}
-	tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 
 }
 
@@ -221,7 +223,7 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPut, "http://localhost:8080/api/v1/comment/"+vars["cID"], reqBody)
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
+	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 
 	response, err := client.Do(request)
 	if err != nil {
@@ -235,13 +237,13 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 
 			if marshalErr != nil {
 				fmt.Println("An unexpected error has occured while editing comment.")
-				tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
+				lib.Tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 			}
 			fmt.Println("Comment edited successfully")
 			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(comment.BusinessID), 10), http.StatusSeeOther)
 		}
 	}
-	tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 }
 
 func DeleteComment(res http.ResponseWriter, req *http.Request) {
@@ -267,7 +269,7 @@ func DeleteComment(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodDelete, "http://localhost:8080/api/v1/comment/"+vars["cID"], nil)
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
+	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 
 	response, err := client.Do(request)
 	if err != nil {

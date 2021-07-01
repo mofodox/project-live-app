@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/mofodox/project-live-app/api/models"
+	"github.com/mofodox/project-live-app/client/lib"
 )
 
 func ListCategory(res http.ResponseWriter, req *http.Request) {
@@ -74,7 +75,7 @@ func ListCategory(res http.ResponseWriter, req *http.Request) {
 			fmt.Println(payload.StartNo)
 
 			fmt.Println(payload)
-			tpl.ExecuteTemplate(res, "categoryListing.gohtml", payload)
+			lib.Tpl.ExecuteTemplate(res, "categoryListing.gohtml", payload)
 			return
 		} else {
 			// handle error
@@ -135,7 +136,7 @@ func ViewCategory(res http.ResponseWriter, req *http.Request) {
 			payload.PageTitle = category.Name
 			payload.Category = category
 
-			tpl.ExecuteTemplate(res, "viewCategory.gohtml", payload)
+			lib.Tpl.ExecuteTemplate(res, "viewCategory.gohtml", payload)
 			return
 		} else {
 			// handle error
@@ -160,7 +161,7 @@ func CreateCategoryPage(res http.ResponseWriter, req *http.Request) {
 		"Create Category", nil, "", "",
 	}
 
-	tpl.ExecuteTemplate(res, "createCategory.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "createCategory.gohtml", payload)
 }
 
 func ProcessCategoryForm(res http.ResponseWriter, req *http.Request) {
@@ -261,7 +262,7 @@ func UpdateCategory(res http.ResponseWriter, req *http.Request) {
 
 		payload.Category = category
 
-		tpl.ExecuteTemplate(res, "updateCategory.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "updateCategory.gohtml", payload)
 		return
 	}
 }
