@@ -93,20 +93,11 @@
                             </div>
                             <div class="comment-content">{{ $val.Content }}</div>
                             {{ if $.User }}
-<<<<<<< HEAD
                             {{ if eq $.User.ID $val.UserID }}                                                        
                             <div>
                                 <small><a href="/business/{{ $val.BusinessID }}/comment/{{ $val.CommentID }}/edit"><i class="fas fa-pencil-alt"></i> Edit</a></small>
                                 <small><a href="/business/{{ $val.BusinessID }}/comment/{{ $val.CommentID }}/delete"><i class="fas fa-times"></i> Delete</a></small>
-                            </div>
-=======
-                                {{ if eq $.User.ID $val.UserID }}
-                                <div>
-                                    <small><a href="/business/{{ $val.BusinessID }}/comment/{{ $val.CommentID }}/edit"><i class="fas fa-pencil-alt"></i> Edit</a></small>
-                                    <small><a href="/business/{{ $val.BusinessID }}/comment/{{ $val.CommentID }}/delete"><i class="fas fa-times"></i> Delete</a></small>
-                                </div>
-                                {{ end }}
->>>>>>> b0c9d500a5e37ef4182b12cc1b82f5189c67ba10
+                            </div>  
                             {{ end }}
                             {{ end }}
                         </div>
