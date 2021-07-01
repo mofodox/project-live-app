@@ -32,7 +32,7 @@ func CreateComment(res http.ResponseWriter, req *http.Request) {
 		"New Comment" /*user,*/, nil, "", "",
 	}
 
-	tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
 }
 
 func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
@@ -85,7 +85,7 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 			marshalErr := json.Unmarshal(resBody, &newComment)
 			if marshalErr != nil {
 				payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
-				tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
+				lib.Tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
 				return
 			}
 			fmt.Println("New comment created successfully")
@@ -93,7 +93,7 @@ func ProcessCommentForm(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 	}
-	tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "createComment.gohtml", payload)
 }
 
 func ViewComment(res http.ResponseWriter, req *http.Request) {
@@ -140,11 +140,11 @@ func ViewComment(res http.ResponseWriter, req *http.Request) {
 				return
 			}
 			fmt.Println("New comment created successfully")
-			tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
+			lib.Tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
 			return
 		}
 	}
-	tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "viewComment.gohtml", payload)
 }
 
 func UpdateComment(res http.ResponseWriter, req *http.Request) {
@@ -156,7 +156,7 @@ func UpdateComment(res http.ResponseWriter, req *http.Request) {
 	}{
 		"Edit Comment", nil, "", "",
 	}
-	tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 
 }
 
@@ -205,13 +205,13 @@ func ProcessUpdateComment(res http.ResponseWriter, req *http.Request) {
 
 			if marshalErr != nil {
 				fmt.Println("An unexpected error has occured while editing comment.")
-				tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
+				lib.Tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 			}
 			fmt.Println("New comment created successfully")
 			http.Redirect(res, req, "/business/"+strconv.FormatUint(uint64(comment.BusinessID), 10), http.StatusOK)
 		}
 	}
-	tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "updateComment.gohtml", payload)
 }
 
 func DeleteComment(res http.ResponseWriter, req *http.Request) {

@@ -5,66 +5,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
-	"math"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
-	"text/template"
-	"time"
-	"unicode"
 
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
 	"github.com/mofodox/project-live-app/client/lib"
 )
 
-var tpl *template.Template
-var apiBaseURL string
-
 const BusinessSearchLimit = 5
-
-func init() {
-	if err := godotenv.Load(); err != nil {
-		log.Fatalf("error getting env values %v\n", err)
-	} else {
-		log.Println("Successfully loaded the env values")
-	}
-
-	apiBaseURL = os.Getenv("APIServerHostname") + ":" + os.Getenv("APIServerPort") + os.Getenv("APIServerBasePath")
-
-	funcMap := template.FuncMap{
-		"add": func(a int, b int) int {
-			return a + b
-		},
-
-		"ucFirst": func(str string) string {
-			if len(str) == 0 {
-				return ""
-			}
-			tmp := []rune(str)
-			tmp[0] = unicode.ToUpper(tmp[0])
-			return string(tmp)
-		},
-
-		"formatDistance": func(distance float64) string {
-			if distance > 1 {
-				return fmt.Sprint(math.Floor(distance*100)/100) + "KM"
-			} else {
-				return fmt.Sprint(math.Floor(distance*100)) + "M"
-			}
-		},
-
-		"formatCommentDate": func(t time.Time) string {
-			return t.Format("2 Jan 2006 3:04 PM")
-		},
-	}
-
-	tpl = template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/*"))
-}
 
 func ListBusiness(res http.ResponseWriter, req *http.Request) {
 
@@ -105,7 +57,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 	}
 
 	client := &http.Client{}
-	url := apiBaseURL + "/businesses" + querystring + addtionalQuerystring
+	url := lib.ApiBaseURL + "/businesses" + querystring + addtionalQuerystring
 	request, _ := http.NewRequest(http.MethodGet, url, nil)
 	request.Header.Set("Content-Type", "application/json")
 
@@ -123,7 +75,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 
 	// success
 	if response.StatusCode == 200 {
-		//var businesses = []*models.Business{}
+
 		var businessSearchResult models.BusinessSearchResult
 
 		marshalErr := json.Unmarshal(data, &businessSearchResult)
@@ -176,7 +128,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 			payload.User = user
 		}
 
-		tpl.ExecuteTemplate(res, "businessListing.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "businessListing.gohtml", payload)
 		return
 	} else {
 		// handle error
@@ -207,7 +159,7 @@ func CreateBusiness(res http.ResponseWriter, req *http.Request) {
 		"Create Business", user, nil, "", "",
 	}
 
-	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 }
 
 func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
@@ -249,12 +201,12 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("error marshalling at process create business", err)
 		payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
-		tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 		return
 	}
 
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodPost, apiBaseURL+"/businesses", bytes.NewBuffer(data))
+	request, _ := http.NewRequest(http.MethodPost, lib.ApiBaseURL+"/businesses", bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 	response, err := client.Do(request)
@@ -263,7 +215,7 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("error sending process create business request")
 		payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
-		tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 		return
 	}
 	defer response.Body.Close()
@@ -277,7 +229,7 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 		if marshalErr != nil {
 			fmt.Println("error unmarshaling at process create business", marshalErr)
 			payload.ErrorMsg = "An unexpected error has occured while creating business. Please try again."
-			tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
+			lib.Tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 			return
 		}
 
@@ -294,7 +246,7 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "createBusiness.gohtml", payload)
 }
 
 func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
@@ -327,7 +279,7 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	}
 
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses/"+vars["id"], nil)
+	request, _ := http.NewRequest(http.MethodGet, lib.ApiBaseURL+"/businesses/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 	response, err := client.Do(request)
 
@@ -354,7 +306,7 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 
 		payload.Business = business
 
-		tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
 		return
 	} else {
 		// handle error
@@ -409,12 +361,12 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("error marshalling at process update business", err)
 		payload.ErrorMsg = "An unexpected error has occured while updating business. Please try again."
-		tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
 		return
 	}
 
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/businesses/"+vars["id"], bytes.NewBuffer(data))
+	request, _ := http.NewRequest(http.MethodPut, lib.ApiBaseURL+"/businesses/"+vars["id"], bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 	response, err := client.Do(request)
@@ -442,7 +394,7 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "updateBusiness.gohtml", payload)
 }
 
 func ViewBusiness(res http.ResponseWriter, req *http.Request) {
@@ -476,7 +428,7 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 	}
 
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/businesses/"+vars["id"], nil)
+	request, _ := http.NewRequest(http.MethodGet, lib.ApiBaseURL+"/businesses/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 	response, err := client.Do(request)
 
@@ -511,7 +463,7 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	request, _ = http.NewRequest(http.MethodGet, apiBaseURL+"/business/"+vars["id"]+"/comments", nil)
+	request, _ = http.NewRequest(http.MethodGet, lib.ApiBaseURL+"/business/"+vars["id"]+"/comments", nil)
 	request.Header.Set("Content-Type", "application/json")
 	response, err = client.Do(request)
 
@@ -537,7 +489,7 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 
 		payload.Comments = bComments
 
-		tpl.ExecuteTemplate(res, "viewBusiness.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "viewBusiness.gohtml", payload)
 		return
 
 	} else {

@@ -6,16 +6,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math"
 	"net/http"
 	"os"
 	"strconv"
+	"text/template"
+	"time"
+	"unicode"
 
 	"github.com/joho/godotenv"
 	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 )
 
-var apiBaseURL string
+var Tpl *template.Template
+var ApiBaseURL string
 
 func init() {
 	if err := godotenv.Load(); err != nil {
@@ -24,7 +29,36 @@ func init() {
 		log.Println("Successfully loaded the env values")
 	}
 
-	apiBaseURL = os.Getenv("APIServerHostname") + ":" + os.Getenv("APIServerPort") + os.Getenv("APIServerBasePath")
+	ApiBaseURL = os.Getenv("APIServerHostname") + ":" + os.Getenv("APIServerPort") + os.Getenv("APIServerBasePath")
+
+	funcMap := template.FuncMap{
+		"add": func(a int, b int) int {
+			return a + b
+		},
+
+		"ucFirst": func(str string) string {
+			if len(str) == 0 {
+				return ""
+			}
+			tmp := []rune(str)
+			tmp[0] = unicode.ToUpper(tmp[0])
+			return string(tmp)
+		},
+
+		"formatDistance": func(distance float64) string {
+			if distance > 1 {
+				return fmt.Sprint(math.Floor(distance*100)/100) + "KM"
+			} else {
+				return fmt.Sprint(math.Floor(distance*100)) + "M"
+			}
+		},
+
+		"formatCommentDate": func(t time.Time) string {
+			return t.Format("2 Jan 2006 3:04 PM")
+		},
+	}
+
+	Tpl = template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/*"))
 }
 
 func IsLoggedIn(req *http.Request) (*models.User, error) {
@@ -41,7 +75,7 @@ func IsLoggedIn(req *http.Request) (*models.User, error) {
 	}
 
 	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+strconv.FormatUint(uint64(userID), 10), nil)
+	request, _ := http.NewRequest(http.MethodGet, ApiBaseURL+"/users/"+strconv.FormatUint(uint64(userID), 10), nil)
 	//request.Header.Set("Content-Type", "application/json")
 	response, err := client.Do(request)
 

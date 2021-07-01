@@ -26,5 +26,5 @@ func Home(res http.ResponseWriter, req *http.Request) {
 		payload.User = user
 	}
 
-	tpl.ExecuteTemplate(res, "index.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "index.gohtml", payload)
 }

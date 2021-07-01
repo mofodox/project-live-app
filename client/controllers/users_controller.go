@@ -55,7 +55,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 
 		responseBuffer := bytes.NewBuffer(data)
 
-		req, err = http.NewRequest(http.MethodPost, apiBaseURL+"/users", responseBuffer)
+		req, err = http.NewRequest(http.MethodPost, lib.ApiBaseURL+"/users", responseBuffer)
 		if err != nil {
 			log.Fatalf("error response occurred %v\n", err)
 		}
@@ -112,7 +112,7 @@ func Register(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	tpl.ExecuteTemplate(res, "register.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "register.gohtml", payload)
 }
 
 func sendLoginRequest(email string, password string) (string, error) {
@@ -129,7 +129,7 @@ func sendLoginRequest(email string, password string) (string, error) {
 
 	responseBuffer := bytes.NewBuffer(data)
 
-	req, err := http.NewRequest(http.MethodPost, apiBaseURL+"/users/login", responseBuffer)
+	req, err := http.NewRequest(http.MethodPost, lib.ApiBaseURL+"/users/login", responseBuffer)
 	if err != nil {
 		log.Fatalf("error response occured %v\n", err)
 	}
@@ -191,7 +191,7 @@ func Login(res http.ResponseWriter, req *http.Request) {
 		payload.ErrorMsg = err.Error()
 	}
 
-	tpl.ExecuteTemplate(res, "login.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "login.gohtml", payload)
 }
 
 func Logout(res http.ResponseWriter, req *http.Request) {
@@ -232,7 +232,7 @@ func ShowProfile(res http.ResponseWriter, req *http.Request) {
 
 	client := &http.Client{}
 
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+vars["id"], nil)
+	request, _ := http.NewRequest(http.MethodGet, lib.ApiBaseURL+"/users/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 
 	response, err := client.Do(request)
@@ -257,7 +257,7 @@ func ShowProfile(res http.ResponseWriter, req *http.Request) {
 
 		payload.User = user
 
-		tpl.ExecuteTemplate(res, "viewProfile.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "viewProfile.gohtml", payload)
 		fmt.Println("GET View Profile payload", payload.User)
 		return
 	} else {
@@ -296,7 +296,7 @@ func UpdateProfile(res http.ResponseWriter, req *http.Request) {
 
 	client := &http.Client{}
 
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+vars["id"], nil)
+	request, _ := http.NewRequest(http.MethodGet, lib.ApiBaseURL+"/users/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 	response, err := client.Do(request)
 
@@ -322,7 +322,7 @@ func UpdateProfile(res http.ResponseWriter, req *http.Request) {
 
 		payload.User = user
 
-		tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
 		fmt.Println("GET Update user payload", payload.User)
 		return
 	} else {
@@ -369,13 +369,13 @@ func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("error marshalling at process update user", err)
 		payload.ErrorMsg = "An unexpected error has occured while updating user. Please try again."
-		tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
+		lib.Tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
 		return
 	}
 
 	client := &http.Client{}
 
-	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/users/"+vars["id"], bytes.NewBuffer(data))
+	request, _ := http.NewRequest(http.MethodPut, lib.ApiBaseURL+"/users/"+vars["id"], bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 
@@ -400,6 +400,6 @@ func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
+	lib.Tpl.ExecuteTemplate(res, "updateUser.gohtml", payload)
 	fmt.Println("PUT Update user payload", payload.User)
 }
