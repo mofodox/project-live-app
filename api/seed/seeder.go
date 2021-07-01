@@ -158,32 +158,32 @@ var comments = []models.Comment{
 	{
 		BusinessID: 1,
 		UserID:     1,
-		Content:    "Test comment 1",
+		Content:    "Best curry buns in Punggol area! 10/10",
 	},
 	{
 		BusinessID: 1,
 		UserID:     2,
-		Content:    "Test comment 2",
+		Content:    "I really like eating the CBs from here",
 	},
 	{
 		BusinessID: 2,
 		UserID:     1,
-		Content:    "Test comment 3",
+		Content:    "If you are a cheese lover, Kunafe is a must try",
 	},
 	{
 		BusinessID: 3,
 		UserID:     2,
-		Content:    "Test comment 4",
+		Content:    "Good brews.",
 	},
 	{
 		BusinessID: 3,
 		UserID:     2,
-		Content:    "Test comment 5",
+		Content:    "Must try for everyone.",
 	},
 	{
 		BusinessID: 3,
 		UserID:     2,
-		Content:    "Test comment 6",
+		Content:    "Good.",
 	},
 }
 
