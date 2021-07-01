@@ -13,68 +13,15 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
+	"github.com/mofodox/project-live-app/client/lib"
 )
-
-func IsLoggedIn(req *http.Request) (*models.User, error) {
-	myCookie, err := req.Cookie("jwt-token")
-	if err != nil {
-		return nil, err
-	}
-
-	token := myCookie.Value
-
-	userID, err := auth.GetTokenID(token)
-	if err != nil {
-		return nil, err
-	}
-
-	// Todo: add cookie check and send JWT with request
-	client := &http.Client{}
-	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+strconv.FormatUint(uint64(userID), 10), nil)
-	request.Header.Set("Content-Type", "application/json")
-	response, err := client.Do(request)
-
-	// handle error
-	if err != nil {
-		fmt.Println("error sending get user info request", err)
-		return nil, err
-	}
-	defer response.Body.Close()
-
-	data, _ := ioutil.ReadAll(response.Body)
-
-	// success
-	if response.StatusCode == 200 {
-		var user *models.User
-		marshalErr := json.Unmarshal(data, &user)
-
-		if marshalErr != nil {
-			return nil, marshalErr
-		}
-
-		return user, nil
-	}
-
-	return nil, errors.New("unable to fetch user")
-}
-
-func GetJWT(req *http.Request) string {
-
-	myCookie, err := req.Cookie("jwt-token")
-	if err == nil {
-		return myCookie.Value
-	}
-
-	return ""
-}
 
 func Register(res http.ResponseWriter, req *http.Request) {
 
 	// Get User
-	_, err := IsLoggedIn(req)
+	_, err := lib.IsLoggedIn(req)
 
 	if err == nil {
 		// already logged in
@@ -141,9 +88,9 @@ func Register(res http.ResponseWriter, req *http.Request) {
 
 			if err == nil {
 				cookie := &http.Cookie{
-					Name:    "jwt-token",
-					Value:   tokenString,
-					Expires: time.Now().Add(time.Hour * 1),
+					Name:     "jwt-token",
+					Value:    tokenString,
+					Expires:  time.Now().Add(time.Hour * 1),
 					HttpOnly: true,
 				}
 
@@ -230,9 +177,9 @@ func Login(res http.ResponseWriter, req *http.Request) {
 
 		if err == nil {
 			cookie := &http.Cookie{
-				Name:    "jwt-token",
-				Value:   tokenString,
-				Expires: time.Now().Add(time.Hour * 1),
+				Name:     "jwt-token",
+				Value:    tokenString,
+				Expires:  time.Now().Add(time.Hour * 1),
 				HttpOnly: true,
 			}
 
@@ -267,7 +214,7 @@ func ShowProfile(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
@@ -284,11 +231,11 @@ func ShowProfile(res http.ResponseWriter, req *http.Request) {
 	}
 
 	client := &http.Client{}
-	
+
 	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+vars["id"], nil)
 	request.Header.Set("Content-Type", "application/json")
 
-	response, err:= client.Do(request)
+	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("error sending get user request", err)
 		http.Redirect(res, req, "/business", http.StatusTemporaryRedirect)
@@ -330,7 +277,7 @@ func UpdateProfile(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
@@ -388,14 +335,14 @@ func UpdateProfile(res http.ResponseWriter, req *http.Request) {
 
 func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	
+
 	_, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Redirect(res, req, "/users/"+ vars["id"], http.StatusSeeOther)
+		http.Redirect(res, req, "/users/"+vars["id"], http.StatusSeeOther)
 		return
 	}
 
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
 		return
@@ -410,9 +357,9 @@ func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 	user.Password = password
 
 	payload := struct {
-		PageTitle string
-		User *models.User
-		ErrorMsg string
+		PageTitle  string
+		User       *models.User
+		ErrorMsg   string
 		SuccessMsg string
 	}{
 		"Update User", user, "", "",
@@ -430,8 +377,8 @@ func ProcessUpdateProfile(res http.ResponseWriter, req *http.Request) {
 
 	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/users/"+vars["id"], bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer " + GetJWT(req))
-	
+	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
+
 	response, err := client.Do(request)
 	if err != nil {
 		fmt.Println("error sending process update user request", err)

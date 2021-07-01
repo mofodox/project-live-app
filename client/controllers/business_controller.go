@@ -19,6 +19,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/mofodox/project-live-app/api/models"
 	"github.com/mofodox/project-live-app/api/responses"
+	"github.com/mofodox/project-live-app/client/lib"
 )
 
 var tpl *template.Template
@@ -169,7 +170,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 		}
 
 		// Get User
-		user, err := IsLoggedIn(req)
+		user, err := lib.IsLoggedIn(req)
 
 		if err == nil {
 			payload.User = user
@@ -188,7 +189,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 func CreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	// Get User
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
@@ -212,7 +213,7 @@ func CreateBusiness(res http.ResponseWriter, req *http.Request) {
 func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 
 	// Get User
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
@@ -255,7 +256,7 @@ func ProcessCreateBusiness(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPost, apiBaseURL+"/businesses", bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
+	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 	response, err := client.Do(request)
 
 	// handle error
@@ -307,7 +308,7 @@ func UpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Get User
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
@@ -374,7 +375,7 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Get User
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 
 	if err != nil {
 		http.Redirect(res, req, "/login", http.StatusSeeOther)
@@ -415,7 +416,7 @@ func ProcessUpdateBusiness(res http.ResponseWriter, req *http.Request) {
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodPut, apiBaseURL+"/businesses/"+vars["id"], bytes.NewBuffer(data))
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("Authorization", "Bearer "+GetJWT(req))
+	request.Header.Set("Authorization", "Bearer "+lib.GetJWT(req))
 	response, err := client.Do(request)
 
 	// handle error
@@ -468,7 +469,7 @@ func ViewBusiness(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Get User
-	user, err := IsLoggedIn(req)
+	user, err := lib.IsLoggedIn(req)
 
 	if err == nil {
 		payload.User = user

@@ -5,10 +5,12 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"strconv"
 
+	"github.com/joho/godotenv"
 	"github.com/mofodox/project-live-app/api/auth"
 	"github.com/mofodox/project-live-app/api/models"
 )
@@ -16,6 +18,12 @@ import (
 var apiBaseURL string
 
 func init() {
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("error getting env values %v\n", err)
+	} else {
+		log.Println("Successfully loaded the env values")
+	}
+
 	apiBaseURL = os.Getenv("APIServerHostname") + ":" + os.Getenv("APIServerPort") + os.Getenv("APIServerBasePath")
 }
 
@@ -32,10 +40,9 @@ func IsLoggedIn(req *http.Request) (*models.User, error) {
 		return nil, err
 	}
 
-	// Todo: add cookie check and send JWT with request
 	client := &http.Client{}
 	request, _ := http.NewRequest(http.MethodGet, apiBaseURL+"/users/"+strconv.FormatUint(uint64(userID), 10), nil)
-	request.Header.Set("Content-Type", "application/json")
+	//request.Header.Set("Content-Type", "application/json")
 	response, err := client.Do(request)
 
 	// handle error
@@ -60,4 +67,14 @@ func IsLoggedIn(req *http.Request) (*models.User, error) {
 	}
 
 	return nil, errors.New("unable to fetch user")
+}
+
+func GetJWT(req *http.Request) string {
+
+	myCookie, err := req.Cookie("jwt-token")
+	if err == nil {
+		return myCookie.Value
+	}
+
+	return ""
 }
