@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -36,7 +37,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 		pageNo = p
 	}
 
-	querystring := "?page=" + strconv.Itoa(pageNo)
+	querystring := "?page=" + url.PathEscape(strconv.Itoa(pageNo))
 	addtionalQuerystring := ""
 
 	// status
@@ -49,10 +50,10 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 	if q != "" {
 		if strings.Contains(strings.ToLower(q), "location:") {
 			q = strings.ReplaceAll(strings.ToLower(q), "location:", "")
-			addtionalQuerystring += "&location=" + q
+			addtionalQuerystring += "&location=" + url.PathEscape(q)
 			searchedLocation = q
 		} else {
-			addtionalQuerystring += "&q=" + q
+			addtionalQuerystring += "&q=" + url.PathEscape(q)
 		}
 	}
 
@@ -132,7 +133,7 @@ func ListBusiness(res http.ResponseWriter, req *http.Request) {
 		return
 	} else {
 		// handle error
-		fmt.Println("Business listing failed")
+		fmt.Println("Business listing failed", url)
 		http.Redirect(res, req, "/", http.StatusTemporaryRedirect)
 		return
 	}
