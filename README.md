@@ -55,6 +55,9 @@ Public users can browse and search for businesses.
 ## Database Flow
 [Miro Board](https://miro.com/app/board/o9J_l-xAAp8=/)
 
+## Slide Deck
+[Google Slide](https://docs.google.com/presentation/d/1NnJDETr3ahUPTryGlZaf8GaE3wp6nLip4mDKJnPidR8/edit?usp=sharing)
+
 ## Team Members
 
 - [Alvin Yeoh](https://github.com/xenodus)
